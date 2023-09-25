@@ -3,6 +3,7 @@ package it.pagopa.mock.idpay.resource;
 import io.quarkus.logging.Log;
 import io.smallrye.mutiny.Uni;
 import it.pagopa.mock.idpay.bean.ErrorResponse;
+import it.pagopa.mock.idpay.bean.TransactionCreationRequest;
 import it.pagopa.mock.idpay.dao.Initiative;
 import it.pagopa.mock.idpay.ErrorCode;
 import it.pagopa.mock.idpay.service.IdpayService;
@@ -108,6 +109,50 @@ public class IdpayResource {
                                 .entity(new ErrorResponse(ErrorCode.INITIATIVES_NOT_FOUND_FOR_MERCHANT, ErrorCode.INITIATIVES_NOT_FOUND_FOR_MERCHANT_MSG))
                                 .build());
 
+
+            return Uni.createFrom().item(
+                    Response.status(Response.Status.OK)
+                            .entity(res)
+                            .build());
+        });
+    }
+
+    @POST
+    @Path("/idpay/mil/payment/qr-code/merchant")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Uni<Response> createTransaction(
+            @Valid
+            @HeaderParam(value = "x-merchant-id") String idpayMerchantId,
+            @HeaderParam(value = "x-acquirer-id") String xAcquirerId,
+            @NotNull(message = "[" + ErrorCode.TRANSACTION_CREATION_REQUEST_MUST_NOT_BE_EMPTY + "] request must not be empty")
+            TransactionCreationRequest transactionCreationRequest) {
+
+        Log.debugf("IdpayResource -> createTransaction - Input transactionCreationRequest: [%s] for idpayMerchantId [%s]", transactionCreationRequest, idpayMerchantId);
+
+        return idpayService.createTransaction(idpayMerchantId, xAcquirerId, transactionCreationRequest).chain(res -> {
+            Log.debugf("IdpayResource -> IdpayService -> createTransaction - Response [%s]", res);
+
+            return Uni.createFrom().item(
+                    Response.status(Status.CREATED)
+                            .entity(res)
+                            .build());
+        });
+    }
+
+    @GET
+    @Path("/idpay/mil/payment/qr-code/merchant/status/{transactionId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Uni<Response> getTransaction(
+            @Valid
+            @PathParam(value = "transactionId") String transactionId,
+            @HeaderParam(value = "x-merchant-id") String idpayMerchantId,
+            @HeaderParam(value = "x-acquirer-id") String xAcquirerId) {
+
+        Log.debugf("IdpayResource -> getTransaction transactionId: [%s], idpayMerchantId: [%s]", transactionId, idpayMerchantId);
+
+        return idpayService.getTransaction(idpayMerchantId, xAcquirerId, transactionId).chain(res -> {
+            Log.debugf("IdpayResource -> IdpayService -> getTransaction - Response [%s]", res);
 
             return Uni.createFrom().item(
                     Response.status(Response.Status.OK)
