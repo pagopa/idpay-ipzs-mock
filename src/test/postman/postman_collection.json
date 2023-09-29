@@ -1,0 +1,490 @@
+{
+	"info": {
+		"_postman_id": "339cdcbc-54e6-48aa-bc7e-2444911323c9",
+		"name": "idpay-ipzs-mock",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "4131675",
+		"_collection_link": "https://crimson-zodiac-456704.postman.co/workspace/Personal-Workspace~7804a326-503c-4623-9152-3f4c38f2d060/collection/4131675-339cdcbc-54e6-48aa-bc7e-2444911323c9?action=share&source=collection_link&creator=4131675"
+	},
+	"item": [
+		{
+			"name": "Initiatives management",
+			"item": [
+				{
+					"name": "Create Initiative",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"initiativeId\": \"b\",\r\n  \"initiativeName\": \"IniziativeNameB\",\r\n  \"organizationName\": \"OrganizationB\",\r\n  \"merchantId\": \"28405fHfk73x88D\",\r\n  \"status\": \"PUBLISHED\",\r\n  \"startDate\": \"2020-01-08\",\r\n  \"endDate\": \"2050-01-30\",\r\n  \"serviceId\": \"serviceIdB\",\r\n  \"enabled\": true,\r\n  \"transactionFinalStatus\": \"IDENTIFIED\",\r\n  \"retriesStatusChanges\": 999    \r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{mockURL}}/mock/initiative",
+							"host": [
+								"{{mockURL}}"
+							],
+							"path": [
+								"mock",
+								"initiative"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Initiatives",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mockURL}}/mock/initiatives",
+							"host": [
+								"{{mockURL}}"
+							],
+							"path": [
+								"mock",
+								"initiatives"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get One Initiative",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{mockURL}}/mock/initiatives/:initiativeId",
+							"host": [
+								"{{mockURL}}"
+							],
+							"path": [
+								"mock",
+								"initiatives",
+								":initiativeId"
+							],
+							"variable": [
+								{
+									"key": "initiativeId",
+									"value": "a"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete One Initiative",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{mockURL}}/mock/initiatives/:initiativeId",
+							"host": [
+								"{{mockURL}}"
+							],
+							"path": [
+								"mock",
+								"initiatives",
+								":initiativeId"
+							],
+							"variable": [
+								{
+									"key": "initiativeId",
+									"value": "a"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Services",
+			"item": [
+				{
+					"name": "Recupero delle iniziative",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "TerminalId",
+								"value": "abc",
+								"type": "text"
+							},
+							{
+								"key": "AcquirerId",
+								"value": "4585625",
+								"type": "text"
+							},
+							{
+								"key": "MerchantId",
+								"value": "28405fHfk73x88D",
+								"type": "text"
+							},
+							{
+								"key": "RequestId",
+								"value": "00000000-0000-0000-0000-00000000000b",
+								"type": "text"
+							},
+							{
+								"key": "Channel",
+								"value": "POS",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{milURL}}/initiatives",
+							"host": [
+								"{{milURL}}"
+							],
+							"path": [
+								"initiatives"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Creazione Transazione",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "TerminalId",
+								"value": "999",
+								"type": "text"
+							},
+							{
+								"key": "AcquirerId",
+								"value": "222",
+								"type": "text"
+							},
+							{
+								"key": "MerchantId",
+								"value": "28405fHfk73x88D",
+								"type": "text"
+							},
+							{
+								"key": "RequestId",
+								"value": "12345678-1111-1234-1234-123456789012",
+								"type": "text"
+							},
+							{
+								"key": "Channel",
+								"value": "POS",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"initiativeId\": \"b\",\r\n  \"timestamp\": \"2023-09-26T14:58:00\",\r\n  \"goodsCost\": 100\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{milURL}}/transactions",
+							"host": [
+								"{{milURL}}"
+							],
+							"path": [
+								"transactions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Recupero dello stato della transazione",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "TerminalId",
+								"value": "999",
+								"type": "text"
+							},
+							{
+								"key": "AcquirerId",
+								"value": "222",
+								"type": "text"
+							},
+							{
+								"key": "MerchantId",
+								"value": "28405fHfk73x88D",
+								"type": "text"
+							},
+							{
+								"key": "RequestId",
+								"value": "12345678-1111-1234-1234-123456789012",
+								"type": "text"
+							},
+							{
+								"key": "Channel",
+								"value": "POS",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{milURL}}/transactions/:transactionId",
+							"host": [
+								"{{milURL}}"
+							],
+							"path": [
+								"transactions",
+								":transactionId"
+							],
+							"variable": [
+								{
+									"key": "transactionId",
+									"value": "c9c432ba-0302-42bf-b132-7f564890b4b4"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Verifica della CIE",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "TerminalId",
+								"value": "999",
+								"type": "text"
+							},
+							{
+								"key": "AcquirerId",
+								"value": "222",
+								"type": "text"
+							},
+							{
+								"key": "MerchantId",
+								"value": "28405fHfk73x88D",
+								"type": "text"
+							},
+							{
+								"key": "RequestId",
+								"value": "12345678-1111-1234-1234-123456789012",
+								"type": "text"
+							},
+							{
+								"key": "Channel",
+								"value": "POS",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"nis\": \"432543576456\",\r\n\t\"ciePublicKey\": \"MEgCQQCo9+BpMRYQ/dL3DS2CyJxRF+j6ctbT3/Qp84+KeFhnii7NT7fELilKUSnxS30WAvQCCo2yU1orfgqr41mM70MBAgMBAAE=\",\r\n\t\"signature\": \"14OJ2TV93OT621XR0MV5NJtMOcK2nCyBXMRhpVxO88xgzhMpoMQ2fQs+ug8+8oKhsOwkYKYRW9VY9u3oYaKIH75RJPHlVe+4J9gKZ6IqpUsYu3Mvb2PDrlwzZV5KH232/b/6QFoD7/STBtMOO8rU0lTkHTw11VsCgHSW4Jv6N4P98zD0ScgIpvgcis5H0SkApyIZs/qAkJyAP9iEw7tOfbO3q1jkK+7nV9G9ia/nlJl+itD6/Nv1u+KQ8OwFq5kPNaDsXPI1CBQp/Ll4Q7gVMWH5toGltfpouQZaMxukb2z0IWxVC//gbIRBoW3qsxlBi23HMNaieyGal2cCEjC/Ng==\",\r\n\t\"sod\": \"EkCTZfFjWVBAXh1ahqBJwKJYD1o7HKBGF0QOCkITt1mGNwQGMSBkDp/xMvyULz3RQG07UYZDWUEZVsAUQ9LKTs6jz7JGgSDH1Yt3+b3PmAahbeLJLj77MFRH5mDHmTekZH3/db+gfZElM8M0AcOAgfYYatA/F1S\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{milURL}}/transactions/:milTransactionId/verifyCie",
+							"host": [
+								"{{milURL}}"
+							],
+							"path": [
+								"transactions",
+								":milTransactionId",
+								"verifyCie"
+							],
+							"variable": [
+								{
+									"key": "milTransactionId",
+									"value": "c9c432ba-0302-42bf-b132-7f564890b4b4"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Autorizzazione transazione",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "TerminalId",
+								"value": "999",
+								"type": "text"
+							},
+							{
+								"key": "AcquirerId",
+								"value": "222",
+								"type": "text"
+							},
+							{
+								"key": "MerchantId",
+								"value": "28405fHfk73x88D",
+								"type": "text"
+							},
+							{
+								"key": "RequestId",
+								"value": "12345678-1111-1234-1234-123456789012",
+								"type": "text"
+							},
+							{
+								"key": "Channel",
+								"value": "POS",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"authCodeBlockData\": {\r\n        \"kid\": \"idpay-wrap-key-222-28405fHfk73x88D-999/afe0569c33844996a83354a6a444530f\",\r\n        \"encSessionKey\": \"LGjgQVhG37hnDWIs0ZieRmIMCNtxW2cyEsVmt_mmstPRBTOId8p-RvS5YE-v4N5WjU7x7e9tsLRB2mO1TlA36JtQpvcnb17oK9all_SV-cRTg5en5WDF4q6EgWXOqbymuBiPDGE0MVQbvZovM8GuSzpcRbufocD7nNbFwZ_H3ZVGVZ2w_QHfV7loyp_9PnTeg9-VLOxUwhWwhQp8Qu_PzUtXERjM_PGVz0APvKxzAigBr7eTeUQ5wGG55rs-7x6eCzjTF-QmO7_pn749E-B-v8exB4dlsKjxAssCnVqIsR6PnHhdiUKbkejUV_dDr14Y4BNPKWKlpX6JI2zUDpe81yQWwy0O9Sh4aWPleHQbjuMRwHjajAcv81PShbKVnUGU9j8mnXqgvMMO2N1yLpJ8s7VHkGgmh8x2dhXe4ARULpLezpKM5VAG5CMFkwPQAaNn-9D14CaEfilQDgEkzy47oiMt-gUpuZEVLTpDFluCzf7ILEzCVhzEsm1SuYCDf8XFNJ94wcsUXDbfypQe-W6s-jsSfxZZCcZrxvl2RGubU8oVD8S_cvRLxDwPYPOyQcqM7qibsovqt4o-OXaW1udKTqNfmM-u3W4L5ceRfkQMuYGgX3xWFTkm5B_zDHEMBftSyRy8xXqZd1nZJZXBxrePWUFZdxSxc6JUs6HA2n7KaE8\",\r\n        \"authCodeBlock\": \"authorizationCodeBlock\"\r\n    }\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{milURL}}/transactions/:transactionId/authorize",
+							"host": [
+								"{{milURL}}"
+							],
+							"path": [
+								"transactions",
+								":transactionId",
+								"authorize"
+							],
+							"variable": [
+								{
+									"key": "transactionId",
+									"value": "c9c432ba-0302-42bf-b132-7f564890b4b4"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Cancellazione della transazione",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "TerminalId",
+								"value": "999",
+								"type": "text"
+							},
+							{
+								"key": "AcquirerId",
+								"value": "222",
+								"type": "text"
+							},
+							{
+								"key": "MerchantId",
+								"value": "28405fHfk73x88D",
+								"type": "text"
+							},
+							{
+								"key": "RequestId",
+								"value": "12345678-1111-1234-1234-123456789012",
+								"type": "text"
+							},
+							{
+								"key": "Channel",
+								"value": "POS",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{milURL}}/transactions/:transactionId",
+							"host": [
+								"{{milURL}}"
+							],
+							"path": [
+								"transactions",
+								":transactionId"
+							],
+							"variable": [
+								{
+									"key": "transactionId",
+									"value": "c9c432ba-0302-42bf-b132-7f564890b4b4"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "{{token}}",
+						"type": "string"
+					}
+				]
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"const options = {",
+							"  url:  'https://mil-d-apim.azure-api.net/mil-auth/token', ",
+							"  method: 'POST',",
+							"  header: {",
+							"        'RequestId': '00000000-0000-0000-0000-00000000000b',",
+							"        'AcquirerId': '4585625',",
+							"        'Channel': 'POS',",
+							"        'MerchantId': '28405fHfk73x88D',",
+							"        'TerminalId': '01234567',",
+							"        'Content-Type': 'application/x-www-form-urlencoded'",
+							"  },",
+							"  body: {",
+							"    mode: 'urlencoded',",
+							"    urlencoded : [",
+							"      { key: 'client_secret', value: '5ceef788-4115-43a7-a704-b1bcc9a47c86'},",
+							"      { key: 'client_id', value: '3965df56-ca9a-49e5-97e8-061433d4a25b'},",
+							"      { key: 'grant_type', value: 'client_credentials'}",
+							"    ]",
+							"  }",
+							"};",
+							"",
+							"",
+							"pm.sendRequest(options, function (err, res) {",
+							"    if (err) {",
+							"        console.error(err);",
+							"    } else {",
+							"        console.log(res);",
+							"        pm.environment.set(\"token\", res.json().access_token);",
+							"    }",
+							"});"
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		}
+	]
+}

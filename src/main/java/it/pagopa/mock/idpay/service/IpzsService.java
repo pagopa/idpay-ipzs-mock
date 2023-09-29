@@ -1,50 +1,46 @@
 package it.pagopa.mock.idpay.service;
 
+import io.quarkus.logging.Log;
+import io.smallrye.mutiny.Uni;
+import it.pagopa.mock.idpay.bean.TransactionStatus;
+import it.pagopa.mock.idpay.bean.ipzs.IpzsVerifyCieRequest;
+import it.pagopa.mock.idpay.bean.ipzs.IpzsVerifyCieResponse;
+import it.pagopa.mock.idpay.bean.ipzs.Outcome;
+import it.pagopa.mock.idpay.dao.IdpayTransactionRepository;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import org.apache.commons.lang3.RandomStringUtils;
+
+import java.nio.charset.StandardCharsets;
 
 @ApplicationScoped
 public class IpzsService {
 
-/*
-    public Uni<InitiativesResponse> getInitiatives(CommonHeader headers) {
+    @Inject
+    IdpayTransactionRepository idpayTransactionRepository;
 
-        Log.debugf("InitiativesService -> getInitiatives - Input parameters: %s", headers);
+    @Inject
+    IdpayService idpayService;
 
-        return idpayInitiativesRestClient.getMerchantInitiativeList(headers.getMerchantId())
-                .onFailure().transform(t -> {
-                    if (t instanceof ClientWebApplicationException webEx && webEx.getResponse().getStatus() == 404) {
-                        Log.errorf(t, " InitiativesService -> getInitiatives: idpay NOT FOUND for MerchantId [%s]", headers.getMerchantId());
-                        Errors errors = new Errors(List.of(ErrorCode.ERROR_NOT_FOUND_IDPAY_REST_SERVICES), List.of(ErrorCode.ERROR_NOT_FOUND_IDPAY_REST_SERVICES_MSG));
-                        return new NotFoundException(Response
-                                .status(Response.Status.NOT_FOUND)
-                                .entity(errors)
-                                .build());
-                    } else {
-                        Log.errorf(t, "InitiativesService -> getInitiatives: idpay error response for MerchantId [%s]", headers.getMerchantId());
-                        Errors errors = new Errors(List.of(ErrorCode.ERROR_CALLING_IDPAY_REST_SERVICES), List.of(ErrorCode.ERROR_CALLING_IDPAY_REST_SERVICES_MSG));
-                        return new InternalServerErrorException(Response
-                                .status(Response.Status.INTERNAL_SERVER_ERROR)
-                                .entity(errors)
-                                .build());
-                    }
-                }).map(res -> {
-                    Log.debugf("InitiativesService -> getInitiatives: idpay getMerchantInitiativeList service returned a 200 status, response: [%s]", res);
+    public Uni<IpzsVerifyCieResponse> identitycards(String transactionId, IpzsVerifyCieRequest ipzsVerifyCieRequest) {
+        Log.debugf("IpzsService -> identitycards - Input parameters: [%s], [%s]", transactionId, ipzsVerifyCieRequest);
 
-                    LocalDate today = LocalDate.now();
+        return idpayService.getIdpayTransactionEntity(transactionId)
+                .chain(transaction -> {//Transaction found
+                    Log.debugf("IdpayService -> cancelTransaction: found idpay transaction [%s]", transactionId);
 
-                    List<Initiative> iniList = res.stream().filter(ini ->
-                                InitiativeStatus.PUBLISHED == ini.getStatus()  && Boolean.TRUE.equals(ini.getEnabled())
-                                        && (today.isAfter(ini.getStartDate()) || today.isEqual(ini.getStartDate()))
-                                        && (ini.getEndDate() == null || (today.isBefore(ini.getEndDate()) || today.isEqual(ini.getEndDate())))
-                            )
-                            .map(fIni -> new Initiative(fIni.getInitiativeId(), fIni.getInitiativeName(), fIni.getOrganizationName())).toList();
+                    transaction.idpayTransaction.setStatus(TransactionStatus.IDENTIFIED);
 
-                    InitiativesResponse inis = new InitiativesResponse();
-                    inis.setInitiatives(iniList);
+                    transaction.idpayTransaction.setRewardCents(Math.round(transaction.idpayTransaction.getAmountCents() / 10d));
+                    transaction.idpayTransaction.setSecondFactor(RandomStringUtils.random(8, true, true).getBytes(StandardCharsets.UTF_8));
 
-                    return inis;
+                    return idpayTransactionRepository.update(transaction) //updating transaction in DB mil
+                            .onFailure().recoverWithItem(err -> {
+                                Log.errorf(err, "IdpayService -> cancelTransaction: Error while updating transaction %s on db", transaction.transactionId);
+
+                                return transaction;
+                            })
+                            .chain(() -> Uni.createFrom().item(new IpzsVerifyCieResponse(Outcome.OK)));
                 });
     }
-
- */
 }

@@ -20,11 +20,15 @@ public final class ErrorCode {
     public static final String ERROR_ENABLED_MUST_NOT_BE_NULL 							                    = MODULE_ID + "000009";
     public static final String ERROR_TRANSACTIONFINALSTATUS_MUST_NOT_BE_NULL 							    = MODULE_ID + "00000A";
     public static final String ERROR_RETRIESSTATUSCHANGES_MUST_NOT_BE_NULL 							        = MODULE_ID + "00000B";
+    public static final String ERROR_KID_MUST_NOT_BE_NULL 							                        = MODULE_ID + "00000C";
+    public static final String ERROR_ENCSESSIONKEY_MUST_NOT_BE_NULL 							            = MODULE_ID + "00000D";
+    public static final String ERROR_AUTHCODEBLOCK_MUST_NOT_BE_NULL 							            = MODULE_ID + "00000E";
 
 
     // rest server validation errors
     public static final String INITIATIVE_MUST_NOT_BE_EMPTY 							                    = MODULE_ID + "000030";
     public static final String TRANSACTION_CREATION_REQUEST_MUST_NOT_BE_EMPTY 							    = MODULE_ID + "000031";
+    public static final String IPZS_REQUEST_MUST_NOT_BE_EMPTY 							                    = MODULE_ID + "000032";
 
 
     //Initiative retrieval error

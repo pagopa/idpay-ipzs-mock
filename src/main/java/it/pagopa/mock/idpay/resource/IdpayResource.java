@@ -2,6 +2,7 @@ package it.pagopa.mock.idpay.resource;
 
 import io.quarkus.logging.Log;
 import io.smallrye.mutiny.Uni;
+import it.pagopa.mock.idpay.bean.AuthorizeTransaction;
 import it.pagopa.mock.idpay.bean.ErrorResponse;
 import it.pagopa.mock.idpay.bean.TransactionCreationRequest;
 import it.pagopa.mock.idpay.dao.Initiative;
@@ -153,6 +154,65 @@ public class IdpayResource {
 
         return idpayService.getTransaction(idpayMerchantId, xAcquirerId, transactionId).chain(res -> {
             Log.debugf("IdpayResource -> IdpayService -> getTransaction - Response [%s]", res);
+
+            return Uni.createFrom().item(
+                    Response.status(Response.Status.OK)
+                            .entity(res)
+                            .build());
+        });
+    }
+
+    @DELETE
+    @Path("/idpay/mil/payment/qr-code/merchant/{transactionId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Uni<Response> cancelTransaction(
+            @Valid
+            @PathParam(value = "transactionId") String transactionId,
+            @HeaderParam(value = "x-merchant-id") String idpayMerchantId,
+            @HeaderParam(value = "x-acquirer-id") String xAcquirerId) {
+
+        Log.debugf("IdpayResource -> cancelTransaction transactionId: [%s], idpayMerchantId: [%s]", transactionId, idpayMerchantId);
+
+        return idpayService.cancelTransaction(idpayMerchantId, xAcquirerId, transactionId).chain(() ->
+                Uni.createFrom().item(
+                        Response.status(Status.OK).build())
+        );
+    }
+
+    @GET
+    @Path("/zonePublicKey")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Uni<Response> retrieveIdpayPublicKey() {
+
+        Log.debugf("IdpayResource -> retrieveIdpayPublicKey");
+
+        return idpayService.retrieveIdpayPublicKey().chain(res -> {
+            Log.debugf("IdpayResource -> retrieveIdpayPublicKey -> Response [%s]", res);
+
+            return Uni.createFrom().item(
+                    Response.status(Response.Status.OK)
+                            .entity(res)
+                            .build());
+        });
+    }
+
+    @POST
+    @Path("/idpay/mil/payment/cie/{idpayTransactionId}/authorize")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Uni<Response> authorize(
+            @Valid
+            @PathParam(value = "idpayTransactionId") String idpayTransactionId,
+            @HeaderParam(value = "x-merchant-id") String idpayMerchantId,
+            @HeaderParam(value = "x-acquirer-id") String xAcquirerId,
+            @NotNull(message = "[" + ErrorCode.TRANSACTION_CREATION_REQUEST_MUST_NOT_BE_EMPTY + "] request must not be empty")
+            AuthorizeTransaction authorizeTransaction) {
+
+        Log.debugf("IdpayResource -> authorize idpayTransactionId: [%s], idpayMerchantId: [%s], xAcquirerId: [%s], authorizeTransaction: [%s]"
+                , idpayTransactionId, idpayMerchantId, xAcquirerId, authorizeTransaction);
+
+        return idpayService.authorize(idpayMerchantId, xAcquirerId, idpayTransactionId, authorizeTransaction).chain(res -> {
+            Log.debugf("IdpayResource -> authorize -> Response [%s]", res);
 
             return Uni.createFrom().item(
                     Response.status(Response.Status.OK)

@@ -5,7 +5,6 @@ import io.smallrye.mutiny.Uni;
 import it.pagopa.mock.idpay.ErrorCode;
 import it.pagopa.mock.idpay.bean.*;
 import it.pagopa.mock.idpay.dao.*;
-import it.pagopa.swclient.mil.bean.Errors;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.InternalServerErrorException;
@@ -159,7 +158,7 @@ public class IdpayService {
         IdpayTransaction idpayTransaction = new IdpayTransaction();
 
         idpayTransaction.setId(transactionID);
-        idpayTransaction.setTrxCode(RandomStringUtils.random(32, true, true));
+        idpayTransaction.setTrxCode(RandomStringUtils.random(24, true, true));
         idpayTransaction.setInitiativeId(transactionCreationRequest.getInitiativeId());
         idpayTransaction.setMerchantId(idpayMerchantId);
         idpayTransaction.setIdTrxAcquirer(transactionCreationRequest.getIdTrxAcquirer());
@@ -224,7 +223,7 @@ public class IdpayService {
     }
 
 
-    private Uni<IdpayTransactionEntity> getIdpayTransactionEntity(String transactionId) {
+    public Uni<IdpayTransactionEntity> getIdpayTransactionEntity(String transactionId) {
         return idpayTransactionRepository.findById(transactionId) //looking for idpayTransactionID in DB
                 .onFailure().transform(t -> {
                     Log.errorf(t, "[%s] IdpayService -> getIdpayTransactionEntity: Error while retrieving idpay transaction [%s] from DB",
@@ -322,6 +321,7 @@ public class IdpayService {
         idpayTransaction.setStatus(initiative.initiative.getTransactionFinalStatus());
         idpayTransaction.setQrcodeTxtUrl(entity.idpayTransaction.getQrcodeTxtUrl());
         idpayTransaction.setOperationType(entity.idpayTransaction.getOperationType());
+        idpayTransaction.setCounter(entity.idpayTransaction.getCounter());
 
         if (TransactionStatus.IDENTIFIED.equals(idpayTransaction.getStatus())) {
             if (entity.idpayTransaction.getRewardCents() != null) {
@@ -350,5 +350,76 @@ public class IdpayService {
         res.idpayTransaction = idpayTransaction;
 
         return res;
+    }
+
+    public Uni<Void> cancelTransaction(String idpayMerchantId, String xAcquirerId, String transactionId) {
+        Log.debugf("IdpayService -> cancelTransaction - Input parameters: [%s], [%s], [%s]", idpayMerchantId, xAcquirerId, transactionId);
+
+        return getIdpayTransactionEntity(transactionId) //looking for transactionID in DB
+                .chain(transaction -> {//Transaction found
+                    Log.debugf("IdpayService -> cancelTransaction: found idpay transaction [%s]", transactionId);
+
+                    transaction.idpayTransaction.setStatus(TransactionStatus.REJECTED);
+                    return idpayTransactionRepository.update(transaction) //updating transaction in DB mil
+                            .onFailure().recoverWithItem(err -> {
+                                Log.errorf(err, "IdpayService -> cancelTransaction: Error while updating transaction %s on db", transaction.transactionId);
+
+                                return transaction;
+                            })
+                            .chain(() -> Uni.createFrom().voidItem());
+                });
+    }
+
+    public Uni<PublicKeyIDPay> retrieveIdpayPublicKey() {
+        return Uni.createFrom().item(PublicKeyIDPay
+                .builder()
+                .keyOps(List.of(KeyOp.wrapKey))
+                .e("AQAB")
+                .n("x9Rbax8IZ6yld9vAu3AQjEBd9Q6fyx29rTkqghK7y4t93TrfTPf0E5Uh3fdZjzCzCDrZUitvGJU4RJObn8dxFGHNXdZaRSZ7uk1kM9E1YjFrHwwXDgCeQl6U6wNL5lTjOrjRm6sj5fgvbQnO61F9zZKpKdoxPrIYpJH8YPfI9owTP1ADfPXj53hwt39DcRV9tY2fjlk3jrs1z1oJFYskTpkq7Ihtmdnq0bGgNwNhEaEoP0BcvYowKLwE4V2y9SUX6LqRzB7VzjucHnxlCc2Ms92Zj0P")
+                .kid("https://quarkus-azure-test-kv.vault.azure.net/keys/0709643f49394529b92c19a68c8e184a/6581c704deda4979943c3b34468df7c2")
+                .exp(1671523199)
+                .iat(1629999999)
+                .kty(KeyType.RSA)
+                .use(PublicKeyUse.enc)
+                .build());
+    }
+
+    public Uni<AuthTransactionResponse> authorize(String xMerchantId, String xAcquirerId, String transactionId, AuthorizeTransaction authorizeTransaction) {
+        Log.debugf("IdpayService -> authorize - Input parameters: [%s], [%s], [%s], [%s]", xMerchantId, xAcquirerId, transactionId, authorizeTransaction);
+
+        return getIdpayTransactionEntity(transactionId) //looking for transactionID in DB
+                .chain(transaction -> {//Transaction found
+                    Log.debugf("IdpayService -> cancelTransaction: found idpay transaction [%s]", transactionId);
+
+                    transaction.idpayTransaction.setStatus(TransactionStatus.AUTHORIZED);
+                    return idpayTransactionRepository.update(transaction) //updating transaction in DB mil
+                            .onFailure().recoverWithItem(err -> {
+                                Log.errorf(err, "IdpayService -> cancelTransaction: Error while updating transaction %s on db", transaction.transactionId);
+
+                                return transaction;
+                            })
+                            .chain(entity -> {
+                                AuthTransactionResponse authTransactionResponse = new AuthTransactionResponse();
+                                AuthTransactionResponseOk authTransactionResponseOk = AuthTransactionResponseOk
+                                        .builder()
+                                        .id(entity.idpayTransaction.getId())
+                                        .idTrxIssuer(entity.idpayTransaction.getIdTrxIssuer())
+                                        .trxCode(entity.idpayTransaction.getTrxCode())
+                                        .trxDate(entity.idpayTransaction.getTrxDate())
+                                        .operationType(entity.idpayTransaction.getOperationType())
+                                        .amountCents(entity.idpayTransaction.getAmountCents())
+                                        .amountCurrency(entity.idpayTransaction.getAmountCurrency())
+                                        .acquirerId(entity.idpayTransaction.getAcquirerId())
+                                        .merchantId(entity.idpayTransaction.getMerchantId())
+                                        .initiativeId(entity.idpayTransaction.getInitiativeId())
+                                        .status(entity.idpayTransaction.getStatus())
+                                        .rewardCents(entity.idpayTransaction.getRewardCents())
+                                        .build();
+
+                                authTransactionResponse.setAuthTransactionResponseOk(authTransactionResponseOk);
+
+                                return Uni.createFrom().item(authTransactionResponse);
+                            });
+                });
     }
 }
