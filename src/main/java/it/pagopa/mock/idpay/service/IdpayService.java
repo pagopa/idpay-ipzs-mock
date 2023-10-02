@@ -137,7 +137,7 @@ public class IdpayService {
                     .build());
         })
                 .chain(initiative -> {
-                    IdpayTransactionEntity entity = createIdpayTransactionEntity(idpayMerchantId, xAcquirerId, transactionCreationRequest);
+                    IdpayTransactionEntity entity = createIdpayTransactionEntity(UUID.randomUUID().toString(), idpayMerchantId, xAcquirerId, transactionCreationRequest);
                     Log.debugf("IdpayService -> createTransaction: storing idpay transaction [%s] on idpay DB", entity);
 
                     return idpayTransactionRepository.persist(entity)
@@ -152,8 +152,7 @@ public class IdpayService {
                 });
     }
 
-    private IdpayTransactionEntity createIdpayTransactionEntity(String idpayMerchantId, String xAcquirerId, TransactionCreationRequest transactionCreationRequest) {
-        String transactionID = UUID.randomUUID().toString();
+    private IdpayTransactionEntity createIdpayTransactionEntity(String transactionID, String idpayMerchantId, String xAcquirerId, TransactionCreationRequest transactionCreationRequest) {
 
         IdpayTransaction idpayTransaction = new IdpayTransaction();
 
