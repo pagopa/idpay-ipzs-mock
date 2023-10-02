@@ -1,0 +1,315 @@
+---
+openapi: 3.0.3
+info:
+  title: idpay-ipzs-mock API
+  version: 0.0.0
+paths:
+  /api/identitycards:
+    post:
+      tags:
+      - Ipzs Resource
+      parameters:
+      - name: transactionId
+        in: query
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IpzsVerifyCieRequest'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json: {}
+  /idpay/mil/payment/cie/{idpayTransactionId}/authorize:
+    post:
+      tags:
+      - Idpay Resource
+      parameters:
+      - name: idpayTransactionId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: x-acquirer-id
+        in: header
+        schema:
+          type: string
+      - name: x-merchant-id
+        in: header
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthorizeTransaction'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json: {}
+  /idpay/mil/payment/qr-code/merchant:
+    post:
+      tags:
+      - Idpay Resource
+      parameters:
+      - name: x-acquirer-id
+        in: header
+        schema:
+          type: string
+      - name: x-merchant-id
+        in: header
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionCreationRequest'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json: {}
+  /idpay/mil/payment/qr-code/merchant/initiatives:
+    get:
+      tags:
+      - Idpay Resource
+      parameters:
+      - name: x-merchant-id
+        in: header
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json: {}
+  /idpay/mil/payment/qr-code/merchant/status/{transactionId}:
+    get:
+      tags:
+      - Idpay Resource
+      parameters:
+      - name: transactionId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: x-acquirer-id
+        in: header
+        schema:
+          type: string
+      - name: x-merchant-id
+        in: header
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json: {}
+  /idpay/mil/payment/qr-code/merchant/{transactionId}:
+    delete:
+      tags:
+      - Idpay Resource
+      parameters:
+      - name: transactionId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: x-acquirer-id
+        in: header
+        schema:
+          type: string
+      - name: x-merchant-id
+        in: header
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json: {}
+  /mock/initiative:
+    post:
+      tags:
+      - Idpay Resource
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Initiative'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json: {}
+  /mock/initiatives:
+    get:
+      tags:
+      - Idpay Resource
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json: {}
+  /mock/initiatives/{initiativeId}:
+    get:
+      tags:
+      - Idpay Resource
+      parameters:
+      - name: initiativeId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json: {}
+    delete:
+      tags:
+      - Idpay Resource
+      parameters:
+      - name: initiativeId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json: {}
+        "401":
+          description: Not Authorized
+        "403":
+          description: Not Allowed
+      security:
+      - SecurityScheme: []
+  /zonePublicKey:
+    get:
+      tags:
+      - Idpay Resource
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json: {}
+components:
+  schemas:
+    AuthCodeBlockData:
+      required:
+      - kid
+      - encSessionKey
+      - authCodeBlock
+      type: object
+      properties:
+        kid:
+          pattern: "^[ -~]{1,2048}$"
+          type: string
+        encSessionKey:
+          maxLength: 2048
+          minLength: 256
+          type: string
+        authCodeBlock:
+          maxLength: 16
+          minLength: 16
+          type: string
+    AuthorizeTransaction:
+      required:
+      - authCodeBlockData
+      type: object
+      properties:
+        authCodeBlockData:
+          $ref: '#/components/schemas/AuthCodeBlockData'
+    Initiative:
+      required:
+      - initiativeId
+      - initiativeName
+      - organizationName
+      - merchantId
+      - status
+      - startDate
+      - endDate
+      - serviceId
+      - enabled
+      - transactionFinalStatus
+      - retriesStatusChanges
+      type: object
+      properties:
+        initiativeId:
+          type: string
+        initiativeName:
+          type: string
+        organizationName:
+          type: string
+        merchantId:
+          type: string
+        status:
+          $ref: '#/components/schemas/InitiativeStatus'
+        startDate:
+          $ref: '#/components/schemas/LocalDate'
+        endDate:
+          $ref: '#/components/schemas/LocalDate'
+        serviceId:
+          type: string
+        enabled:
+          type: boolean
+        transactionFinalStatus:
+          $ref: '#/components/schemas/TransactionStatus'
+        retriesStatusChanges:
+          format: int32
+          type: integer
+    InitiativeStatus:
+      enum:
+      - PUBLISHED
+      - CLOSED
+      type: string
+    IpzsVerifyCieRequest:
+      type: object
+      properties:
+        nis:
+          type: string
+        sod:
+          type: string
+        kpubint:
+          type: string
+        challenge:
+          type: string
+        challengeSignature:
+          type: string
+    LocalDate:
+      format: date
+      type: string
+      example: 2022-03-10
+    TransactionCreationRequest:
+      type: object
+      properties:
+        initiativeId:
+          type: string
+        amountCents:
+          format: int64
+          type: integer
+        mcc:
+          type: string
+        idTrxAcquirer:
+          type: string
+    TransactionStatus:
+      enum:
+      - CREATED
+      - IDENTIFIED
+      - AUTHORIZED
+      - REJECTED
+      - REWARDED
+      type: string
+  securitySchemes:
+    SecurityScheme:
+      type: http
+      description: Authentication
+      scheme: basic

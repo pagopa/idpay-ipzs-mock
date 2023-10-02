@@ -1,4 +1,4 @@
 resource_group_name  = "terraform-state-rg"
 storage_account_name = "tfappdevmil"
 container_name       = "terraform-state"
-key                  = "mil-idpay-mock.tfstate"
+key                  = "idpay-ipzs-mock.tfstate"
