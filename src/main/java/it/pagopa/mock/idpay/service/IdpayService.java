@@ -11,6 +11,7 @@ import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Response;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
@@ -157,7 +158,7 @@ public class IdpayService {
         IdpayTransaction idpayTransaction = new IdpayTransaction();
 
         idpayTransaction.setId(transactionID);
-        idpayTransaction.setTrxCode(RandomStringUtils.random(24, true, true));
+        idpayTransaction.setTrxCode(RandomStringUtils.random(8, true, true));
         idpayTransaction.setInitiativeId(transactionCreationRequest.getInitiativeId());
         idpayTransaction.setMerchantId(idpayMerchantId);
         idpayTransaction.setIdTrxAcquirer(transactionCreationRequest.getIdTrxAcquirer());
@@ -205,13 +206,21 @@ public class IdpayService {
 
                     return getInitiativeEntity(transaction.idpayTransaction.getInitiativeId())
                             .chain(initiative -> {
-                                if (transaction.idpayTransaction.getCounter() < initiative.initiative.getRetriesStatusChanges()) {
+                                if ((transaction.idpayTransaction.getCounter() < initiative.initiative.getRetriesIntStatusChanges()) //se count prima del intermedio o tra Int e Fin - solo increment count
+                                        || (transaction.idpayTransaction.getCounter() >  initiative.initiative.getRetriesIntStatusChanges()
+                                        && transaction.idpayTransaction.getCounter() < initiative.initiative.getRetriesFinStatusChanges())) {
                                     transaction.idpayTransaction.setCounter(transaction.idpayTransaction.getCounter() + 1);
                                     return updateIdpayTransactionEntity(transaction)
                                             .map(this::getTransactionStatusResponseFromEntity);
+                                } else if (transaction.idpayTransaction.getCounter() == initiative.initiative.getRetriesIntStatusChanges() //se il momento Int - cambiamo stato in Intermedio
+                                        && !initiative.initiative.getTransactionIntermediateStatus().equals(transaction.idpayTransaction.getStatus())) {
+                                    transaction.idpayTransaction.setCounter(transaction.idpayTransaction.getCounter() + 1);
+                                    IdpayTransactionEntity updIntTransaction = createFinalIdpayTransactionEntity(transaction, initiative, false);
+                                    return updateIdpayTransactionEntity(updIntTransaction)
+                                            .map(this::getTransactionStatusResponseFromEntity);
                                 } else {
                                     if (!initiative.initiative.getTransactionFinalStatus().equals(transaction.idpayTransaction.getStatus())) {
-                                        IdpayTransactionEntity updTransaction = createFinalIdpayTransactionEntity(transaction, initiative);
+                                        IdpayTransactionEntity updTransaction = createFinalIdpayTransactionEntity(transaction, initiative, true);
                                         return updateIdpayTransactionEntity(updTransaction)
                                                 .map(this::getTransactionStatusResponseFromEntity);
                                     }
@@ -304,7 +313,7 @@ public class IdpayService {
                 });
     }
 
-    private IdpayTransactionEntity createFinalIdpayTransactionEntity(IdpayTransactionEntity entity, InitiativeEntity initiative) {
+    private IdpayTransactionEntity createFinalIdpayTransactionEntity(IdpayTransactionEntity entity, InitiativeEntity initiative, boolean finalStatus) {
 
         IdpayTransaction idpayTransaction = new IdpayTransaction();
 
@@ -317,7 +326,11 @@ public class IdpayService {
         idpayTransaction.setAmountCents(entity.idpayTransaction.getAmountCents());
         idpayTransaction.setAmountCurrency(entity.idpayTransaction.getAmountCurrency());
         idpayTransaction.setAcquirerId(entity.idpayTransaction.getAcquirerId());
-        idpayTransaction.setStatus(initiative.initiative.getTransactionFinalStatus());
+        if (finalStatus) {
+            idpayTransaction.setStatus(initiative.initiative.getTransactionFinalStatus());
+        } else {
+            idpayTransaction.setStatus(initiative.initiative.getTransactionIntermediateStatus());
+        }
         idpayTransaction.setQrcodeTxtUrl(entity.idpayTransaction.getQrcodeTxtUrl());
         idpayTransaction.setOperationType(entity.idpayTransaction.getOperationType());
         idpayTransaction.setCounter(entity.idpayTransaction.getCounter());
@@ -332,7 +345,7 @@ public class IdpayService {
             if (entity.idpayTransaction.getSecondFactor() != null) {
                 idpayTransaction.setSecondFactor(entity.idpayTransaction.getSecondFactor());
             } else {
-                idpayTransaction.setSecondFactor(RandomStringUtils.random(8, true, true).getBytes(StandardCharsets.UTF_8));
+                idpayTransaction.setSecondFactor(StringUtils.leftPad(RandomStringUtils.random(12, false, true), 16, "0").getBytes(StandardCharsets.UTF_8));
             }
         }
 

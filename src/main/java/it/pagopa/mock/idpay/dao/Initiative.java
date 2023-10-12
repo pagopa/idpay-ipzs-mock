@@ -47,6 +47,12 @@ public class Initiative {
     @NotNull(message = "[" + ErrorCode.ERROR_TRANSACTIONFINALSTATUS_MUST_NOT_BE_NULL + "] transactionFinalStatus must not be null")
     private TransactionStatus transactionFinalStatus;
 
-    @NotNull(message = "[" + ErrorCode.ERROR_RETRIESSTATUSCHANGES_MUST_NOT_BE_NULL + "] retriesStatusChanges must not be null")
-    private int retriesStatusChanges;
+    @NotNull(message = "[" + ErrorCode.ERROR_RETRIESFINSTATUSCHANGES_MUST_NOT_BE_NULL + "] retriesFinStatusChanges must not be null")
+    private int retriesFinStatusChanges;
+
+    @NotNull(message = "[" + ErrorCode.ERROR_TRANSACTIONINTERMEDIATE_MUST_NOT_BE_NULL + "] transactionIntermediateStatus must not be null")
+    private TransactionStatus transactionIntermediateStatus;
+
+    @NotNull(message = "[" + ErrorCode.ERROR_RETRIESINTSTATUSCHANGES_MUST_NOT_BE_NULL + "] retriesIntStatusChanges must not be null")
+    private int retriesIntStatusChanges;
 }
