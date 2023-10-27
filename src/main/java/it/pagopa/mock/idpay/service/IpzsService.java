@@ -9,9 +9,6 @@ import it.pagopa.mock.idpay.bean.ipzs.Outcome;
 import it.pagopa.mock.idpay.dao.IdpayTransactionRepository;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import org.apache.commons.lang3.RandomStringUtils;
-
-import java.nio.charset.StandardCharsets;
 
 @ApplicationScoped
 public class IpzsService {
@@ -32,7 +29,6 @@ public class IpzsService {
                     transaction.idpayTransaction.setStatus(TransactionStatus.IDENTIFIED);
 
                     transaction.idpayTransaction.setRewardCents(Math.round(transaction.idpayTransaction.getAmountCents() / 10d));
-                    transaction.idpayTransaction.setSecondFactor(RandomStringUtils.random(8, true, true).getBytes(StandardCharsets.UTF_8));
 
                     return idpayTransactionRepository.update(transaction) //updating transaction in DB mil
                             .onFailure().recoverWithItem(err -> {

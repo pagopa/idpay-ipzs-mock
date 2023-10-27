@@ -2,11 +2,11 @@ package it.pagopa.mock.idpay.resource;
 
 import io.quarkus.logging.Log;
 import io.smallrye.mutiny.Uni;
-import it.pagopa.mock.idpay.bean.AuthorizeTransaction;
+import it.pagopa.mock.idpay.ErrorCode;
 import it.pagopa.mock.idpay.bean.ErrorResponse;
+import it.pagopa.mock.idpay.bean.PinBlockDTO;
 import it.pagopa.mock.idpay.bean.TransactionCreationRequest;
 import it.pagopa.mock.idpay.dao.Initiative;
-import it.pagopa.mock.idpay.ErrorCode;
 import it.pagopa.mock.idpay.service.IdpayService;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
@@ -95,11 +95,14 @@ public class IdpayResource {
     //==========================================================
 
     @GET
-    @Path("/idpay/mil/payment/qr-code/merchant/initiatives")
+    @Path("/idpay/mil/merchant/initiatives")
     @Produces(MediaType.APPLICATION_JSON)
-    public Uni<Response> getMerchantInitiativeList(@Valid @HeaderParam(value = "x-merchant-id") String merchantId) {
+    public Uni<Response> getMerchantInitiativeList(
+            @Valid
+            @HeaderParam(value = "x-merchant-fiscalcode") String merchantId,
+            @HeaderParam(value = "x-acquirer-id") String acquirerId) {
 
-        Log.debugf("IdpayResource -> getMerchantInitiativeList [%s]", merchantId);
+        Log.debugf("IdpayResource -> getMerchantInitiativeList [%s], [%s]", merchantId, acquirerId);
 
         return idpayService.getMerchantInitiativeList(merchantId).chain(res -> {
             Log.debugf("IdpayResource -> IdpayService -> getMerchantInitiativeList - Response [%s]", res);
@@ -119,12 +122,12 @@ public class IdpayResource {
     }
 
     @POST
-    @Path("/idpay/mil/payment/qr-code/merchant")
+    @Path("/idpay/mil/payment")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Uni<Response> createTransaction(
             @Valid
-            @HeaderParam(value = "x-merchant-id") String idpayMerchantId,
+            @HeaderParam(value = "x-merchant-fiscalcode") String idpayMerchantId,
             @HeaderParam(value = "x-acquirer-id") String xAcquirerId,
             @NotNull(message = "[" + ErrorCode.TRANSACTION_CREATION_REQUEST_MUST_NOT_BE_EMPTY + "] request must not be empty")
             TransactionCreationRequest transactionCreationRequest) {
@@ -142,12 +145,12 @@ public class IdpayResource {
     }
 
     @GET
-    @Path("/idpay/mil/payment/qr-code/merchant/status/{transactionId}")
+    @Path("/idpay/mil/payment/status/{transactionId}")
     @Produces(MediaType.APPLICATION_JSON)
     public Uni<Response> getTransaction(
             @Valid
             @PathParam(value = "transactionId") String transactionId,
-            @HeaderParam(value = "x-merchant-id") String idpayMerchantId,
+            @HeaderParam(value = "x-merchant-fiscalcode") String idpayMerchantId,
             @HeaderParam(value = "x-acquirer-id") String xAcquirerId) {
 
         Log.debugf("IdpayResource -> getTransaction transactionId: [%s], idpayMerchantId: [%s]", transactionId, idpayMerchantId);
@@ -163,12 +166,12 @@ public class IdpayResource {
     }
 
     @DELETE
-    @Path("/idpay/mil/payment/qr-code/merchant/{transactionId}")
+    @Path("/idpay/mil/payment/{transactionId}")
     @Produces(MediaType.APPLICATION_JSON)
     public Uni<Response> cancelTransaction(
             @Valid
             @PathParam(value = "transactionId") String transactionId,
-            @HeaderParam(value = "x-merchant-id") String idpayMerchantId,
+            @HeaderParam(value = "x-merchant-fiscalcode") String idpayMerchantId,
             @HeaderParam(value = "x-acquirer-id") String xAcquirerId) {
 
         Log.debugf("IdpayResource -> cancelTransaction transactionId: [%s], idpayMerchantId: [%s]", transactionId, idpayMerchantId);
@@ -196,23 +199,44 @@ public class IdpayResource {
         });
     }
 
-    @POST
-    @Path("/idpay/mil/payment/cie/{idpayTransactionId}/authorize")
+    @PUT
+    @Path("/idpay/mil/payment/idpay-code/{idpayTransactionId}/authorize")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Uni<Response> authorize(
             @Valid
             @PathParam(value = "idpayTransactionId") String idpayTransactionId,
-            @HeaderParam(value = "x-merchant-id") String idpayMerchantId,
+            @HeaderParam(value = "x-merchant-fiscalcode") String idpayMerchantId,
             @HeaderParam(value = "x-acquirer-id") String xAcquirerId,
             @NotNull(message = "[" + ErrorCode.TRANSACTION_CREATION_REQUEST_MUST_NOT_BE_EMPTY + "] request must not be empty")
-            AuthorizeTransaction authorizeTransaction) {
+            PinBlockDTO pinBlockDTO) {
 
         Log.debugf("IdpayResource -> authorize idpayTransactionId: [%s], idpayMerchantId: [%s], xAcquirerId: [%s], authorizeTransaction: [%s]"
-                , idpayTransactionId, idpayMerchantId, xAcquirerId, authorizeTransaction);
+                , idpayTransactionId, idpayMerchantId, xAcquirerId, pinBlockDTO);
 
-        return idpayService.authorize(idpayMerchantId, xAcquirerId, idpayTransactionId, authorizeTransaction).chain(res -> {
+        return idpayService.authorize(idpayMerchantId, xAcquirerId, idpayTransactionId, pinBlockDTO).chain(res -> {
             Log.debugf("IdpayResource -> authorize -> Response [%s]", res);
+
+            return Uni.createFrom().item(
+                    Response.status(Response.Status.OK)
+                            .entity(res)
+                            .build());
+        });
+    }
+
+    @PUT
+    @Path("/idpay/mil/payment/idpay-code/{transactionId}/preview")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Uni<Response> putPreviewPreAuthPayment(
+            @Valid
+            @PathParam(value = "transactionId") String transactionId,
+            @HeaderParam(value = "x-merchant-fiscalcode") String idpayMerchantId,
+            @HeaderParam(value = "x-acquirer-id") String xAcquirerId) {
+
+        Log.debugf("IdpayResource -> putPreviewPreAuthPayment transactionId: [%s], idpayMerchantId: [%s]", transactionId, idpayMerchantId);
+
+        return idpayService.putPreviewPreAuthPayment(idpayMerchantId, xAcquirerId, transactionId).chain(res -> {
+            Log.debugf("IdpayResource -> IdpayService -> putPreviewPreAuthPayment - Response [%s]", res);
 
             return Uni.createFrom().item(
                     Response.status(Response.Status.OK)

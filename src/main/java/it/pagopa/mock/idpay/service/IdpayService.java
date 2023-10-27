@@ -13,7 +13,6 @@ import jakarta.ws.rs.core.Response;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -167,7 +166,7 @@ public class IdpayService {
         idpayTransaction.setAmountCurrency("EUR");
         idpayTransaction.setAcquirerId(xAcquirerId);
         idpayTransaction.setStatus(TransactionStatus.CREATED);
-        idpayTransaction.setQrcodeTxtUrl(RandomStringUtils.random(32, true, true));
+        idpayTransaction.setTrxTxtUrl(RandomStringUtils.random(32, true, true));
 
         idpayTransaction.setOperationType(OperationType.CHARGE);
         idpayTransaction.setCounter(1);
@@ -192,7 +191,7 @@ public class IdpayService {
         response.setAmountCurrency(entity.idpayTransaction.getAmountCurrency());
         response.setAcquirerId(entity.idpayTransaction.getAcquirerId());
         response.setStatus(entity.idpayTransaction.getStatus());
-        response.setQrcodeTxtUrl(entity.idpayTransaction.getQrcodeTxtUrl());
+        response.setTrxTxtUrl(entity.idpayTransaction.getTrxTxtUrl());
 
         return response;
     }
@@ -289,12 +288,7 @@ public class IdpayService {
         response.setInitiativeId(entity.idpayTransaction.getInitiativeId());
         response.setStatus(entity.idpayTransaction.getStatus());
 
-        if (TransactionStatus.IDENTIFIED.equals(entity.idpayTransaction.getStatus())) {
-            response.setRewardCents(entity.idpayTransaction.getRewardCents());
-            response.setSecondFactor(entity.idpayTransaction.getSecondFactor());
-        }
-
-        if (TransactionStatus.AUTHORIZED.equals(entity.idpayTransaction.getStatus())) {
+        if (TransactionStatus.IDENTIFIED.equals(entity.idpayTransaction.getStatus()) || TransactionStatus.AUTHORIZED.equals(entity.idpayTransaction.getStatus())) {
             response.setRewardCents(entity.idpayTransaction.getRewardCents());
         }
 
@@ -331,30 +325,18 @@ public class IdpayService {
         } else {
             idpayTransaction.setStatus(initiative.initiative.getTransactionIntermediateStatus());
         }
-        idpayTransaction.setQrcodeTxtUrl(entity.idpayTransaction.getQrcodeTxtUrl());
+        idpayTransaction.setTrxTxtUrl(entity.idpayTransaction.getTrxTxtUrl());
         idpayTransaction.setOperationType(entity.idpayTransaction.getOperationType());
         idpayTransaction.setCounter(entity.idpayTransaction.getCounter());
 
-        if (TransactionStatus.IDENTIFIED.equals(idpayTransaction.getStatus())) {
+        if (TransactionStatus.IDENTIFIED.equals(idpayTransaction.getStatus()) || TransactionStatus.AUTHORIZED.equals(idpayTransaction.getStatus())) {
             if (entity.idpayTransaction.getRewardCents() != null) {
                 idpayTransaction.setRewardCents(entity.idpayTransaction.getRewardCents());
             } else {
                 idpayTransaction.setRewardCents(Math.round(entity.idpayTransaction.getAmountCents() / 10d));
             }
 
-            if (entity.idpayTransaction.getSecondFactor() != null) {
-                idpayTransaction.setSecondFactor(entity.idpayTransaction.getSecondFactor());
-            } else {
-                idpayTransaction.setSecondFactor(StringUtils.leftPad(RandomStringUtils.random(12, false, true), 16, "0").getBytes(StandardCharsets.UTF_8));
-            }
-        }
 
-        if (TransactionStatus.AUTHORIZED.equals(idpayTransaction.getStatus())) {
-            if (entity.idpayTransaction.getRewardCents() != null) {
-                idpayTransaction.setRewardCents(entity.idpayTransaction.getRewardCents());
-            } else {
-                idpayTransaction.setRewardCents(Math.round(entity.idpayTransaction.getAmountCents() / 10d));
-            }
         }
 
         IdpayTransactionEntity res = new IdpayTransactionEntity();
@@ -396,8 +378,8 @@ public class IdpayService {
                 .build());
     }
 
-    public Uni<AuthTransactionResponse> authorize(String xMerchantId, String xAcquirerId, String transactionId, AuthorizeTransaction authorizeTransaction) {
-        Log.debugf("IdpayService -> authorize - Input parameters: [%s], [%s], [%s], [%s]", xMerchantId, xAcquirerId, transactionId, authorizeTransaction);
+    public Uni<AuthTransactionResponse> authorize(String xMerchantId, String xAcquirerId, String transactionId, PinBlockDTO pinBlockDTO) {
+        Log.debugf("IdpayService -> authorize - Input parameters: [%s], [%s], [%s], [%s]", xMerchantId, xAcquirerId, transactionId, pinBlockDTO);
 
         return getIdpayTransactionEntity(transactionId) //looking for transactionID in DB
                 .chain(transaction -> {//Transaction found
@@ -415,17 +397,10 @@ public class IdpayService {
                                 AuthTransactionResponseOk authTransactionResponseOk = AuthTransactionResponseOk
                                         .builder()
                                         .id(entity.idpayTransaction.getId())
-                                        .idTrxIssuer(entity.idpayTransaction.getIdTrxIssuer())
                                         .trxCode(entity.idpayTransaction.getTrxCode())
-                                        .trxDate(entity.idpayTransaction.getTrxDate())
-                                        .operationType(entity.idpayTransaction.getOperationType())
                                         .amountCents(entity.idpayTransaction.getAmountCents())
-                                        .amountCurrency(entity.idpayTransaction.getAmountCurrency())
-                                        .acquirerId(entity.idpayTransaction.getAcquirerId())
-                                        .merchantId(entity.idpayTransaction.getMerchantId())
                                         .initiativeId(entity.idpayTransaction.getInitiativeId())
                                         .status(entity.idpayTransaction.getStatus())
-                                        .rewardCents(entity.idpayTransaction.getRewardCents())
                                         .build();
 
                                 authTransactionResponse.setAuthTransactionResponseOk(authTransactionResponseOk);
@@ -433,5 +408,19 @@ public class IdpayService {
                                 return Uni.createFrom().item(authTransactionResponse);
                             });
                 });
+    }
+
+    public Uni<PreAuthPaymentResponseDTO> putPreviewPreAuthPayment(String idpayMerchantId, String xAcquirerId, String transactionId) {
+        Log.debugf("IdpayService -> putPreviewPreAuthPayment - Input parameters: [%s], [%s], [%s]", idpayMerchantId, xAcquirerId, transactionId);
+
+        return Uni.createFrom().item(PreAuthPaymentResponseDTO
+                .builder()
+                        .id("id")
+                        .trxCode("trxCode")
+                        .amountCents(1234L)
+                        .initiativeId("iniziativeId1")
+                        .status(TransactionStatus.IDENTIFIED)
+                        .secondFactor(StringUtils.leftPad(RandomStringUtils.random(12, false, true), 16, "0"))
+                .build());
     }
 }

@@ -23,6 +23,5 @@ public class IdpayTransaction extends TransactionResponse {
     private OperationType operationType;
     private Long rewardCents;
     private List<String> rejectionReasons;
-    private byte[] secondFactor;
     private int counter;
 }

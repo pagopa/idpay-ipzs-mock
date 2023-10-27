@@ -19,12 +19,14 @@ public final class ErrorCode {
     public static final String ERROR_SERVICEID_MUST_NOT_BE_NULL 							                = MODULE_ID + "000008";
     public static final String ERROR_ENABLED_MUST_NOT_BE_NULL 							                    = MODULE_ID + "000009";
     public static final String ERROR_TRANSACTIONFINALSTATUS_MUST_NOT_BE_NULL 							    = MODULE_ID + "00000A";
-    public static final String ERROR_RETRIESFINSTATUSCHANGES_MUST_NOT_BE_NULL 							        = MODULE_ID + "00000B";
+    public static final String ERROR_RETRIESFINSTATUSCHANGES_MUST_NOT_BE_NULL 							    = MODULE_ID + "00000B";
     public static final String ERROR_KID_MUST_NOT_BE_NULL 							                        = MODULE_ID + "00000C";
     public static final String ERROR_ENCSESSIONKEY_MUST_NOT_BE_NULL 							            = MODULE_ID + "00000D";
     public static final String ERROR_AUTHCODEBLOCK_MUST_NOT_BE_NULL 							            = MODULE_ID + "00000E";
     public static final String ERROR_TRANSACTIONINTERMEDIATE_MUST_NOT_BE_NULL 							    = MODULE_ID + "00000F";
     public static final String ERROR_RETRIESINTSTATUSCHANGES_MUST_NOT_BE_NULL 							    = MODULE_ID + "000010";
+    public static final String ERROR_ENCRYPTEDPINBLOCK_MUST_NOT_BE_NULL 							        = MODULE_ID + "000024";
+    public static final String ERROR_ENCRYPTEDKEY_MUST_NOT_BE_NULL 							                = MODULE_ID + "000025";
 
 
     // rest server validation errors
