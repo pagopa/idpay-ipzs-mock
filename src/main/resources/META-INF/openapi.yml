@@ -3,6 +3,11 @@ openapi: 3.0.3
 info:
   title: idpay-ipzs-mock API
   version: 0.0.0
+servers:
+- url: http://localhost:8080
+  description: Auto generated value
+- url: http://0.0.0.0:8080
+  description: Auto generated value
 paths:
   /api/identitycards:
     post:
@@ -23,35 +28,25 @@ paths:
           description: OK
           content:
             application/json: {}
-  /idpay/mil/payment/cie/{idpayTransactionId}/authorize:
-    post:
+  /idpay/mil/merchant/initiatives:
+    get:
       tags:
       - Idpay Resource
       parameters:
-      - name: idpayTransactionId
-        in: path
-        required: true
-        schema:
-          type: string
       - name: x-acquirer-id
         in: header
         schema:
           type: string
-      - name: x-merchant-id
+      - name: x-merchant-fiscalcode
         in: header
         schema:
           type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AuthorizeTransaction'
       responses:
         "200":
           description: OK
           content:
             application/json: {}
-  /idpay/mil/payment/qr-code/merchant:
+  /idpay/mil/payment:
     post:
       tags:
       - Idpay Resource
@@ -60,7 +55,7 @@ paths:
         in: header
         schema:
           type: string
-      - name: x-merchant-id
+      - name: x-merchant-fiscalcode
         in: header
         schema:
           type: string
@@ -74,22 +69,36 @@ paths:
           description: OK
           content:
             application/json: {}
-  /idpay/mil/payment/qr-code/merchant/initiatives:
-    get:
+  /idpay/mil/payment/idpay-code/{idpayTransactionId}/authorize:
+    put:
       tags:
       - Idpay Resource
       parameters:
-      - name: x-merchant-id
+      - name: idpayTransactionId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: x-acquirer-id
         in: header
         schema:
           type: string
+      - name: x-merchant-fiscalcode
+        in: header
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PinBlockDTO'
       responses:
         "200":
           description: OK
           content:
             application/json: {}
-  /idpay/mil/payment/qr-code/merchant/status/{transactionId}:
-    get:
+  /idpay/mil/payment/idpay-code/{transactionId}/preview:
+    put:
       tags:
       - Idpay Resource
       parameters:
@@ -102,7 +111,7 @@ paths:
         in: header
         schema:
           type: string
-      - name: x-merchant-id
+      - name: x-merchant-fiscalcode
         in: header
         schema:
           type: string
@@ -111,7 +120,7 @@ paths:
           description: OK
           content:
             application/json: {}
-  /idpay/mil/payment/qr-code/merchant/{transactionId}:
+  /idpay/mil/payment/{transactionId}:
     delete:
       tags:
       - Idpay Resource
@@ -125,7 +134,30 @@ paths:
         in: header
         schema:
           type: string
-      - name: x-merchant-id
+      - name: x-merchant-fiscalcode
+        in: header
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json: {}
+  /idpay/mil/payment/{transactionId}/status:
+    get:
+      tags:
+      - Idpay Resource
+      parameters:
+      - name: transactionId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: x-acquirer-id
+        in: header
+        schema:
+          type: string
+      - name: x-merchant-fiscalcode
         in: header
         schema:
           type: string
@@ -203,31 +235,6 @@ paths:
             application/json: {}
 components:
   schemas:
-    AuthCodeBlockData:
-      required:
-      - kid
-      - encSessionKey
-      - authCodeBlock
-      type: object
-      properties:
-        kid:
-          pattern: "^[ -~]{1,2048}$"
-          type: string
-        encSessionKey:
-          maxLength: 2048
-          minLength: 256
-          type: string
-        authCodeBlock:
-          maxLength: 16
-          minLength: 16
-          type: string
-    AuthorizeTransaction:
-      required:
-      - authCodeBlockData
-      type: object
-      properties:
-        authCodeBlockData:
-          $ref: '#/components/schemas/AuthCodeBlockData'
     Initiative:
       required:
       - initiativeId
@@ -240,7 +247,9 @@ components:
       - serviceId
       - enabled
       - transactionFinalStatus
-      - retriesStatusChanges
+      - retriesFinStatusChanges
+      - transactionIntermediateStatus
+      - retriesIntStatusChanges
       type: object
       properties:
         initiativeId:
@@ -263,7 +272,12 @@ components:
           type: boolean
         transactionFinalStatus:
           $ref: '#/components/schemas/TransactionStatus'
-        retriesStatusChanges:
+        retriesFinStatusChanges:
+          format: int32
+          type: integer
+        transactionIntermediateStatus:
+          $ref: '#/components/schemas/TransactionStatus'
+        retriesIntStatusChanges:
           format: int32
           type: integer
     InitiativeStatus:
@@ -277,17 +291,31 @@ components:
         nis:
           type: string
         sod:
+          format: binary
           type: string
         kpubint:
+          format: binary
           type: string
         challenge:
+          format: binary
           type: string
         challengeSignature:
+          format: binary
           type: string
     LocalDate:
       format: date
       type: string
       example: 2022-03-10
+    PinBlockDTO:
+      required:
+      - encryptedPinBlock
+      - encryptedKey
+      type: object
+      properties:
+        encryptedPinBlock:
+          type: string
+        encryptedKey:
+          type: string
     TransactionCreationRequest:
       type: object
       properties:
