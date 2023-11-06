@@ -224,6 +224,7 @@ paths:
           description: Not Allowed
       security:
       - SecurityScheme: []
+      - SecurityScheme: []
   /zonePublicKey:
     get:
       tags:
