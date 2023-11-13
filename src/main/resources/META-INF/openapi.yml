@@ -120,6 +120,15 @@ paths:
           description: OK
           content:
             application/json: {}
+  /idpay/mil/payment/publickey:
+    get:
+      tags:
+      - Idpay Resource
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json: {}
   /idpay/mil/payment/{transactionId}:
     delete:
       tags:
@@ -143,7 +152,7 @@ paths:
           description: OK
           content:
             application/json: {}
-  /idpay/mil/payment/status/{transactionId}:
+  /idpay/mil/payment/{transactionId}/status:
     get:
       tags:
       - Idpay Resource
@@ -224,16 +233,6 @@ paths:
           description: Not Allowed
       security:
       - SecurityScheme: []
-      - SecurityScheme: []
-  /zonePublicKey:
-    get:
-      tags:
-      - Idpay Resource
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json: {}
 components:
   schemas:
     Initiative:

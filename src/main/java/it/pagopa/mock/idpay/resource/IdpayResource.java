@@ -145,7 +145,7 @@ public class IdpayResource {
     }
 
     @GET
-    @Path("/idpay/mil/payment/status/{transactionId}")
+    @Path("/idpay/mil/payment/{transactionId}/status")
     @Produces(MediaType.APPLICATION_JSON)
     public Uni<Response> getTransaction(
             @Valid
@@ -183,7 +183,7 @@ public class IdpayResource {
     }
 
     @GET
-    @Path("/zonePublicKey")
+    @Path("/idpay/mil/payment/publickey")
     @Produces(MediaType.APPLICATION_JSON)
     public Uni<Response> retrieveIdpayPublicKey() {
 
