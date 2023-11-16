@@ -13,6 +13,19 @@ import jakarta.ws.rs.core.Response;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
+import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.RSAPublicKeySpec;
+import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -422,5 +435,45 @@ public class IdpayService {
                         .status(TransactionStatus.IDENTIFIED)
                         .secondFactor(StringUtils.leftPad(RandomStringUtils.random(12, false, true), 16, "0"))
                 .build());
+    }
+
+    public Uni<String> encryptSessionKeyForIdpay(String modulus, String exponent, String sessionKey)  {
+
+        try {
+            // Decode Base64 values in byte
+            byte[] modulusBytes = Base64.getUrlDecoder().decode(modulus);
+            byte[] exponentBytes = Base64.getUrlDecoder().decode(exponent);
+
+            // Create specific RSA public key
+            RSAPublicKeySpec rsaPublicKeySpec = new RSAPublicKeySpec(
+                    new BigInteger(1, modulusBytes),
+                    new BigInteger(1, exponentBytes)
+            );
+
+            // Get RSA public key
+            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+            PublicKey rsaPublicKey = keyFactory.generatePublic(rsaPublicKeySpec);
+
+            Cipher cipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA-256AndMGF1Padding");
+            byte[] sessionKeyBytes = sessionKey.getBytes(StandardCharsets.UTF_8);
+            cipher.init(Cipher.ENCRYPT_MODE, rsaPublicKey);
+            byte[] encryptedSessionKeyBytes = cipher.doFinal(sessionKeyBytes);
+
+            // encryptedSessionKeyBytes contains encrypted session key
+            return Uni.createFrom().item(Base64.getEncoder().encodeToString(encryptedSessionKeyBytes));
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException |
+                 NoSuchPaddingException | InvalidKeyException |
+                 IllegalBlockSizeException |
+                 BadPaddingException error) {
+
+            // If encrypt retrieve some error, return INTERNAL_SERVER_ERROR
+            Log.errorf("Error during encrypting session key");
+            error.printStackTrace();
+
+            throw new InternalServerErrorException(Response
+                    .status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(new ErrorResponse(ErrorCode.ERROR_ENCRYPTING_SESSION_KEY, ErrorCode.ERROR_ENCRYPTING_SESSION_KEY_MSG))
+                    .build());
+        }
     }
 }

@@ -33,6 +33,8 @@ public final class ErrorCode {
     public static final String INITIATIVE_MUST_NOT_BE_EMPTY 							                    = MODULE_ID + "000030";
     public static final String TRANSACTION_CREATION_REQUEST_MUST_NOT_BE_EMPTY 							    = MODULE_ID + "000031";
     public static final String IPZS_REQUEST_MUST_NOT_BE_EMPTY 							                    = MODULE_ID + "000032";
+    public static final String ENCRYPTSESSIONKEYREQUEST_MUST_NOT_BE_EMPTY 							        = MODULE_ID + "000033";
+    public static final String ERROR_ENCRYPTING_SESSION_KEY 							                    = MODULE_ID + "000034";
 
 
     //Initiative retrieval error
@@ -56,6 +58,7 @@ public final class ErrorCode {
     public static final String ERROR_TRANSACTION_NOT_FOUND_IDPAY_DB_DESCR = "Transaction not found on idpay DB";
     public static final String ERROR_INITIATIVE_NOT_FOUND_IDPAY_DB_DESCR = "Initiative not found on idpay DB";
     public static final String ERROR_UPDATING_DATA_IN_DB_DESCR = "Error updating data in DB";
+    public static final String ERROR_ENCRYPTING_SESSION_KEY_DESCR = "Error occurs during encrypting session key";
     /*
      * Error messages
      */
@@ -66,6 +69,7 @@ public final class ErrorCode {
     public static final String ERROR_TRANSACTION_NOT_FOUND_IDPAY_DB_MSG = "[" + ERROR_TRANSACTION_NOT_FOUND_IDPAY_DB + "] " + ERROR_TRANSACTION_NOT_FOUND_IDPAY_DB_DESCR;
     public static final String ERROR_INITIATIVE_NOT_FOUND_IDPAY_DB_MSG = "[" + ERROR_INITIATIVE_NOT_FOUND_IDPAY_DB + "] " + ERROR_INITIATIVE_NOT_FOUND_IDPAY_DB_DESCR;
     public static final String ERROR_UPDATING_DATA_IN_DB_MSG = "[" + ERROR_UPDATING_DATA_IN_DB + "] " + ERROR_UPDATING_DATA_IN_DB_DESCR;
+    public static final String ERROR_ENCRYPTING_SESSION_KEY_MSG = "[" + ERROR_ENCRYPTING_SESSION_KEY + "] " + ERROR_ENCRYPTING_SESSION_KEY_DESCR;
 
     private ErrorCode() {
     }

@@ -175,6 +175,20 @@ paths:
           description: OK
           content:
             application/json: {}
+  /mock/encryptSessionKey:
+    post:
+      tags:
+      - Idpay Resource
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EncryptSessionKeyRequest'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json: {}
   /mock/initiative:
     post:
       tags:
@@ -235,6 +249,15 @@ paths:
       - SecurityScheme: []
 components:
   schemas:
+    EncryptSessionKeyRequest:
+      type: object
+      properties:
+        modulus:
+          type: string
+        exponent:
+          type: string
+        sessionKey:
+          type: string
     Initiative:
       required:
       - initiativeId

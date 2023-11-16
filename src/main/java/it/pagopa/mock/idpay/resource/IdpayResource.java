@@ -3,6 +3,7 @@ package it.pagopa.mock.idpay.resource;
 import io.quarkus.logging.Log;
 import io.smallrye.mutiny.Uni;
 import it.pagopa.mock.idpay.ErrorCode;
+import it.pagopa.mock.idpay.bean.EncryptSessionKeyRequest;
 import it.pagopa.mock.idpay.bean.ErrorResponse;
 import it.pagopa.mock.idpay.bean.PinBlockDTO;
 import it.pagopa.mock.idpay.bean.TransactionCreationRequest;
@@ -236,6 +237,28 @@ public class IdpayResource {
         Log.debugf("IdpayResource -> putPreviewPreAuthPayment transactionId: [%s], idpayMerchantId: [%s]", transactionId, idpayMerchantId);
 
         return idpayService.putPreviewPreAuthPayment(idpayMerchantId, xAcquirerId, transactionId).chain(res -> {
+            Log.debugf("IdpayResource -> IdpayService -> putPreviewPreAuthPayment - Response [%s]", res);
+
+            return Uni.createFrom().item(
+                    Response.status(Response.Status.OK)
+                            .entity(res)
+                            .build());
+        });
+    }
+
+
+    @POST
+    @Path("/mock/encryptSessionKey")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Uni<Response> encryptSessionKey(
+            @Valid
+            @NotNull(message = "[" + ErrorCode.ENCRYPTSESSIONKEYREQUEST_MUST_NOT_BE_EMPTY + "] request must not be empty")
+            EncryptSessionKeyRequest request) {
+
+        Log.debugf("IdpayResource -> encryptSessionKey - Input: [%s]", request);
+
+        return idpayService.encryptSessionKeyForIdpay(request.getModulus(), request.getExponent(), request.getSessionKey()).chain(res -> {
             Log.debugf("IdpayResource -> IdpayService -> putPreviewPreAuthPayment - Response [%s]", res);
 
             return Uni.createFrom().item(
