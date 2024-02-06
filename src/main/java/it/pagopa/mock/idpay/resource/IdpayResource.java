@@ -259,7 +259,7 @@ public class IdpayResource {
         Log.debugf("IdpayResource -> encryptSessionKey - Input: [%s]", request);
 
         return idpayService.encryptSessionKeyForIdpay(request.getModulus(), request.getExponent(), request.getSessionKey()).chain(res -> {
-            Log.debugf("IdpayResource -> IdpayService -> putPreviewPreAuthPayment - Response [%s]", res);
+            Log.debugf("IdpayResource -> IdpayService -> encryptSessionKey - Response [%s]", res);
 
             return Uni.createFrom().item(
                     Response.status(Response.Status.OK)
