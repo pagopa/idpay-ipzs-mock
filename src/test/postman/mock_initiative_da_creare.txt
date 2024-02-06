@@ -1,0 +1,302 @@
+Tutti i punti di interfaccia menzionati nella procedura di sotto sono evidenziati con rettangoli rossi nel file postman.jpg rilasciato 
+ nella cartella "idpay-ipzs-mock/src/test/postman/" del mock.
+
+Per creare iniziative, bisogna aprire postman collection idpay-ipzs-mock rilasciata nella cartella "idpay-ipzs-mock/src/test/postman/" del mock,
+dentro la cartella "Initiatives management" aprire la chiamata "Create Initiative". Nel menu in alto a destra selezionare l'Environment "dev". 
+Nella finestra di chiamata a destra selezionare il tab "Body".
+
+Nella finestra apparsa sotto incollare UNA iniziativa tra quelli riportati sotto (come mostrato nel file postman.jpg) e premere pulsante blu "Send".
+
+Se viene restituito il codice 204 - la procedura è andata a buon fine e si può procedere con la prossima iniziativa - sempre una alla volta.
+
+E' possibile controllare la lista delle iniziative caricati sul DB del mock facendo la chiamata senza parametri al servizio "Get Initiatives" 
+presente sempre nella collection "idpay-ipzs-mock -> Initiatives management" rilasciata.
+==================================
+
+ANDROID MERCHANTID "28405fHfk73x88D"
+PAX MERCHANTID "12346789"
+POYNT MERCHANTID "999999600307"
+MERCHANTID IDPAY per allineare MOCK "33444433488"
+
+Nome iniziativa : “Iniziativa OK", primoRetry :2, statoIntermedio : “IDENTIFIED”, RetryFinale :3, statoFinale: “AUTHORIZED”
+Nome iniziativa : “Iniziativa KO”, primoRetry :2, statoIntermedio : “IDENTIFIED”, RetryFinale :3, statoFinale: “CREATED”
+Nome iniziativa : “Iniziativa OK fast”, primoRetry :2, statoIntermedio : “AUTHORIZED”, RetryFinale :3, statoFinale: “AUTHORIZED”
+Nome iniziativa : “iniziativa non identificata”, primoRetry :2, statoIntermedio : “CREATED”, RetryFinale :3, statoFinale: “CREATED”
+
+==================================
+Initiative per POYNT MERCHANTID "999999600307"
+{
+  "initiativeId": "IniziativaOK3",
+  "initiativeName": "Iniziativa OK",
+  "organizationName": "Organization1",
+  "merchantId": "999999600307",
+  "status": "PUBLISHED",
+  "startDate": "2020-01-08",
+  "endDate": "2050-01-30",
+  "serviceId": "serviceId1",
+  "enabled": true,
+  "transactionIntermediateStatus": "IDENTIFIED",
+  "retriesIntStatusChanges": 2,
+  "transactionFinalStatus": "AUTHORIZED",
+  "retriesFinStatusChanges": 3  
+}
+
+{
+  "initiativeId": "IniziativaKO3",
+  "initiativeName": "Iniziativa KO",
+  "organizationName": "Organization1",
+  "merchantId": "999999600307",
+  "status": "PUBLISHED",
+  "startDate": "2020-01-08",
+  "endDate": "2050-01-30",
+  "serviceId": "serviceId1",
+  "enabled": true,
+  "transactionIntermediateStatus": "IDENTIFIED",
+  "retriesIntStatusChanges": 2,
+  "transactionFinalStatus": "CREATED",
+  "retriesFinStatusChanges": 3  
+}
+
+{
+  "initiativeId": "IniziativaOKfast3",
+  "initiativeName": "Iniziativa OK fast",
+  "organizationName": "Organization1",
+  "merchantId": "999999600307",
+  "status": "PUBLISHED",
+  "startDate": "2020-01-08",
+  "endDate": "2050-01-30",
+  "serviceId": "serviceId1",
+  "enabled": true,
+  "transactionIntermediateStatus": "AUTHORIZED",
+  "retriesIntStatusChanges": 2,
+  "transactionFinalStatus": "AUTHORIZED",
+  "retriesFinStatusChanges": 3   
+}
+
+
+
+{
+  "initiativeId": "iniziativaNonIdentificata3",
+  "initiativeName": "iniziativa non identificata",
+  "organizationName": "Organization1",
+  "merchantId": "999999600307",
+  "status": "PUBLISHED",
+  "startDate": "2020-01-08",
+  "endDate": "2050-01-30",
+  "serviceId": "serviceId1",
+  "enabled": true,
+  "transactionIntermediateStatus": "CREATED",
+  "retriesIntStatusChanges": 2,
+  "transactionFinalStatus": "CREATED",
+  "retriesFinStatusChanges": 3   
+}
+========================================
+
+Initiative per PAX MERCHANTID "12346789"
+
+{
+  "initiativeId": "IniziativaOK2",
+  "initiativeName": "Iniziativa OK",
+  "organizationName": "Organization1",
+  "merchantId": "12346789",
+  "status": "PUBLISHED",
+  "startDate": "2020-01-08",
+  "endDate": "2050-01-30",
+  "serviceId": "serviceId1",
+  "enabled": true,
+  "transactionIntermediateStatus": "IDENTIFIED",
+  "retriesIntStatusChanges": 2,
+  "transactionFinalStatus": "AUTHORIZED",
+  "retriesFinStatusChanges": 3  
+}
+
+{
+  "initiativeId": "IniziativaKO2",
+  "initiativeName": "Iniziativa KO",
+  "organizationName": "Organization1",
+  "merchantId": "12346789",
+  "status": "PUBLISHED",
+  "startDate": "2020-01-08",
+  "endDate": "2050-01-30",
+  "serviceId": "serviceId1",
+  "enabled": true,
+  "transactionIntermediateStatus": "IDENTIFIED",
+  "retriesIntStatusChanges": 2,
+  "transactionFinalStatus": "CREATED",
+  "retriesFinStatusChanges": 3  
+}
+
+{
+  "initiativeId": "IniziativaOKfast2",
+  "initiativeName": "Iniziativa OK fast",
+  "organizationName": "Organization1",
+  "merchantId": "12346789",
+  "status": "PUBLISHED",
+  "startDate": "2020-01-08",
+  "endDate": "2050-01-30",
+  "serviceId": "serviceId1",
+  "enabled": true,
+  "transactionIntermediateStatus": "AUTHORIZED",
+  "retriesIntStatusChanges": 2,
+  "transactionFinalStatus": "AUTHORIZED",
+  "retriesFinStatusChanges": 3   
+}
+
+
+
+{
+  "initiativeId": "iniziativaNonIdentificata2",
+  "initiativeName": "iniziativa non identificata",
+  "organizationName": "Organization1",
+  "merchantId": "12346789",
+  "status": "PUBLISHED",
+  "startDate": "2020-01-08",
+  "endDate": "2050-01-30",
+  "serviceId": "serviceId1",
+  "enabled": true,
+  "transactionIntermediateStatus": "CREATED",
+  "retriesIntStatusChanges": 2,
+  "transactionFinalStatus": "CREATED",
+  "retriesFinStatusChanges": 3   
+}
+
+========================================
+
+Initiative per ANDROID MERCHANTID "28405fHfk73x88D"
+
+{
+  "initiativeId": "IniziativaOK1",
+  "initiativeName": "Iniziativa OK",
+  "organizationName": "Organization1",
+  "merchantId": "28405fHfk73x88D",
+  "status": "PUBLISHED",
+  "startDate": "2020-01-08",
+  "endDate": "2050-01-30",
+  "serviceId": "serviceId1",
+  "enabled": true,
+  "transactionIntermediateStatus": "IDENTIFIED",
+  "retriesIntStatusChanges": 2,
+  "transactionFinalStatus": "AUTHORIZED",
+  "retriesFinStatusChanges": 3  
+}
+
+{
+  "initiativeId": "IniziativaKO1",
+  "initiativeName": "Iniziativa KO",
+  "organizationName": "Organization1",
+  "merchantId": "28405fHfk73x88D",
+  "status": "PUBLISHED",
+  "startDate": "2020-01-08",
+  "endDate": "2050-01-30",
+  "serviceId": "serviceId1",
+  "enabled": true,
+  "transactionIntermediateStatus": "IDENTIFIED",
+  "retriesIntStatusChanges": 2,
+  "transactionFinalStatus": "CREATED",
+  "retriesFinStatusChanges": 3  
+}
+
+{
+  "initiativeId": "IniziativaOKfast1",
+  "initiativeName": "Iniziativa OK fast",
+  "organizationName": "Organization1",
+  "merchantId": "28405fHfk73x88D",
+  "status": "PUBLISHED",
+  "startDate": "2020-01-08",
+  "endDate": "2050-01-30",
+  "serviceId": "serviceId1",
+  "enabled": true,
+  "transactionIntermediateStatus": "AUTHORIZED",
+  "retriesIntStatusChanges": 2,
+  "transactionFinalStatus": "AUTHORIZED",
+  "retriesFinStatusChanges": 3   
+}
+
+
+
+{
+  "initiativeId": "iniziativaNonIdentificata1",
+  "initiativeName": "iniziativa non identificata",
+  "organizationName": "Organization1",
+  "merchantId": "28405fHfk73x88D",
+  "status": "PUBLISHED",
+  "startDate": "2020-01-08",
+  "endDate": "2050-01-30",
+  "serviceId": "serviceId1",
+  "enabled": true,
+  "transactionIntermediateStatus": "CREATED",
+  "retriesIntStatusChanges": 2,
+  "transactionFinalStatus": "CREATED",
+  "retriesFinStatusChanges": 3   
+}
+
+
+========================================
+
+MERCHANTID IDPAY per allineare MOCK "33444433488"
+
+{
+  "initiativeId": "IniziativaOK4",
+  "initiativeName": "Iniziativa OK",
+  "organizationName": "Organization1",
+  "merchantId": "33444433488",
+  "status": "PUBLISHED",
+  "startDate": "2020-01-08",
+  "endDate": "2050-01-30",
+  "serviceId": "serviceId1",
+  "enabled": true,
+  "transactionIntermediateStatus": "IDENTIFIED",
+  "retriesIntStatusChanges": 2,
+  "transactionFinalStatus": "AUTHORIZED",
+  "retriesFinStatusChanges": 3  
+}
+
+{
+  "initiativeId": "IniziativaKO4",
+  "initiativeName": "Iniziativa KO",
+  "organizationName": "Organization1",
+  "merchantId": "33444433488",
+  "status": "PUBLISHED",
+  "startDate": "2020-01-08",
+  "endDate": "2050-01-30",
+  "serviceId": "serviceId1",
+  "enabled": true,
+  "transactionIntermediateStatus": "IDENTIFIED",
+  "retriesIntStatusChanges": 2,
+  "transactionFinalStatus": "CREATED",
+  "retriesFinStatusChanges": 3  
+}
+
+{
+  "initiativeId": "IniziativaOKfast4",
+  "initiativeName": "Iniziativa OK fast",
+  "organizationName": "Organization1",
+  "merchantId": "33444433488",
+  "status": "PUBLISHED",
+  "startDate": "2020-01-08",
+  "endDate": "2050-01-30",
+  "serviceId": "serviceId1",
+  "enabled": true,
+  "transactionIntermediateStatus": "AUTHORIZED",
+  "retriesIntStatusChanges": 2,
+  "transactionFinalStatus": "AUTHORIZED",
+  "retriesFinStatusChanges": 3   
+}
+
+
+
+{
+  "initiativeId": "iniziativaNonIdentificata4",
+  "initiativeName": "iniziativa non identificata",
+  "organizationName": "Organization1",
+  "merchantId": "33444433488",
+  "status": "PUBLISHED",
+  "startDate": "2020-01-08",
+  "endDate": "2050-01-30",
+  "serviceId": "serviceId1",
+  "enabled": true,
+  "transactionIntermediateStatus": "CREATED",
+  "retriesIntStatusChanges": 2,
+  "transactionFinalStatus": "CREATED",
+  "retriesFinStatusChanges": 3   
+}
