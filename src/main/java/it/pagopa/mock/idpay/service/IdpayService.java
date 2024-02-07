@@ -439,6 +439,7 @@ public class IdpayService {
 
     public Uni<String> encryptSessionKeyForIdpay(String modulus, String exponent, String sessionKey)  {
 
+        Log.debugf("IdpayService -> encryptSessionKeyForIdpay - Input parameters: [%s], [%s], [%s]", modulus, exponent, sessionKey);
         try {
             // Decode Base64 values in byte
             byte[] modulusBytes = Base64.getUrlDecoder().decode(modulus);
