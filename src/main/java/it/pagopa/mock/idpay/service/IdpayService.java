@@ -460,7 +460,7 @@ public class IdpayService {
             byte[] encryptedSessionKeyBytes = cipher.doFinal(sessionKeyBytes);
 
             // encryptedSessionKeyBytes contains encrypted session key
-            return Uni.createFrom().item(Base64.getEncoder().encodeToString(encryptedSessionKeyBytes));
+            return Uni.createFrom().item(Base64.getUrlEncoder().encodeToString(encryptedSessionKeyBytes));
         } catch (NoSuchAlgorithmException | InvalidKeySpecException |
                  NoSuchPaddingException | InvalidKeyException |
                  IllegalBlockSizeException |
