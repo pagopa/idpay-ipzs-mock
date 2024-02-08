@@ -13,10 +13,7 @@ import jakarta.ws.rs.core.Response;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
+import javax.crypto.*;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
@@ -459,7 +456,12 @@ public class IdpayService {
             Cipher cipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA-256AndMGF1Padding");
             byte[] sessionKeyBytes = sessionKey.getBytes(StandardCharsets.UTF_8);
             cipher.init(Cipher.ENCRYPT_MODE, rsaPublicKey);
-            byte[] encryptedSessionKeyBytes = cipher.doFinal(sessionKeyBytes);
+
+            SecretKey key = this.generateSessionKey();
+
+            //byte[] encryptedSessionKeyBytes = cipher.doFinal(sessionKeyBytes);
+
+            byte[] encryptedSessionKeyBytes = cipher.doFinal(key.getEncoded());
 
             // encryptedSessionKeyBytes contains encrypted session key
             return Uni.createFrom().item(Base64.getUrlEncoder().encodeToString(encryptedSessionKeyBytes));
@@ -470,6 +472,29 @@ public class IdpayService {
 
             // If encrypt retrieve some error, return INTERNAL_SERVER_ERROR
             Log.errorf("Error during encrypting session key");
+            error.printStackTrace();
+
+            throw new InternalServerErrorException(Response
+                    .status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity(new ErrorResponse(ErrorCode.ERROR_ENCRYPTING_SESSION_KEY, ErrorCode.ERROR_ENCRYPTING_SESSION_KEY_MSG))
+                    .build());
+        }
+    }
+
+
+    public SecretKey generateSessionKey() {
+        Log.debugf("IdpayService -> generateSessionKey - START");
+
+        try {
+            KeyGenerator generator = KeyGenerator.getInstance("AES");
+            generator.init(256);
+
+            return generator.generateKey();
+
+        } catch (NoSuchAlgorithmException error) {
+
+            // If encrypt retrieve some error, return INTERNAL_SERVER_ERROR
+            Log.errorf("Error during generating session key");
             error.printStackTrace();
 
             throw new InternalServerErrorException(Response
