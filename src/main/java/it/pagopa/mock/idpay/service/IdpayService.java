@@ -431,6 +431,7 @@ public class IdpayService {
                         .id("id")
                         .trxCode("trxCode")
                         .amountCents(1234L)
+                        .reward(123L)
                         .initiativeId("iniziativeId1")
                         .status(TransactionStatus.IDENTIFIED)
                         .secondFactor(StringUtils.leftPad(RandomStringUtils.random(12, false, true), 16, "0"))
