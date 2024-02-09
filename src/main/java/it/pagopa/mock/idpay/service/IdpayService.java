@@ -14,13 +14,13 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.crypto.*;
+import javax.crypto.spec.OAEPParameterSpec;
+import javax.crypto.spec.PSource;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
-import java.security.InvalidKeyException;
-import java.security.KeyFactory;
-import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
+import java.security.*;
 import java.security.spec.InvalidKeySpecException;
+import java.security.spec.MGF1ParameterSpec;
 import java.security.spec.RSAPublicKeySpec;
 import java.util.Base64;
 import java.util.Date;
@@ -48,7 +48,7 @@ public class IdpayService {
         entity.initiative = initiative;
 
         return initiativeRepository.persist(entity)
-                .onFailure().transform(err-> {
+                .onFailure().transform(err -> {
                     Log.errorf(err, "IdpayService -> insertInitiative: Error while storing initiative %s on db", initiative.getInitiativeId());
 
                     return new InternalServerErrorException(Response
@@ -77,7 +77,7 @@ public class IdpayService {
         Log.debugf("IdpayService -> deleteInitiative - Input parameters: [%s]", initiativeId);
 
         return initiativeRepository.deleteById(initiativeId)
-                .onFailure().transform(err-> {
+                .onFailure().transform(err -> {
                     Log.errorf(err, "IdpayService -> deleteInitiative: Error while deleting initiative %s on db", initiativeId);
 
                     return new InternalServerErrorException(Response
@@ -92,8 +92,8 @@ public class IdpayService {
 
     public Uni<List<InitiativeResponse>> getMerchantInitiativeList(String merchantId) {
         return initiativeRepository.find(
-                "initiative.merchantId = ?1", merchantId).list()
-                .onFailure().transform(err-> {
+                        "initiative.merchantId = ?1", merchantId).list()
+                .onFailure().transform(err -> {
                     Log.errorf(err, "IdpayService -> getMerchantInitiativeList: Error while retrieving initiatives for merchantId %s on db", merchantId);
 
                     return new InternalServerErrorException(Response
@@ -126,32 +126,32 @@ public class IdpayService {
         Log.debugf("IdpayService -> createTransaction - Input parameters: [%s], [%s], [%s]", idpayMerchantId, xAcquirerId, transactionCreationRequest);
 
         return initiativeRepository.find(
-                "initiative.merchantId = ?1 and initiative.initiativeId = ?2"
+                        "initiative.merchantId = ?1 and initiative.initiativeId = ?2"
                         , idpayMerchantId,
                         transactionCreationRequest.getInitiativeId()).firstResult()
-        .onFailure().transform(err-> {
-            Log.errorf(err, "IdpayService -> createTransaction: Error while retrieving initiative for merchantId %s on db", idpayMerchantId);
+                .onFailure().transform(err -> {
+                    Log.errorf(err, "IdpayService -> createTransaction: Error while retrieving initiative for merchantId %s on db", idpayMerchantId);
 
-            return new InternalServerErrorException(Response
-                    .status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(err.getMessage())
-                    .build());
-        })
-        .onItem().ifNull().failWith(() -> {
-            // if no transaction is found return TRANSACTION_NOT_FOUND
-            Log.errorf("IdpayService -> createTransaction: initiative [%s] not found for merchant [%s] on idpay DB", transactionCreationRequest.getInitiativeId(), idpayMerchantId);
+                    return new InternalServerErrorException(Response
+                            .status(Response.Status.INTERNAL_SERVER_ERROR)
+                            .entity(err.getMessage())
+                            .build());
+                })
+                .onItem().ifNull().failWith(() -> {
+                    // if no transaction is found return TRANSACTION_NOT_FOUND
+                    Log.errorf("IdpayService -> createTransaction: initiative [%s] not found for merchant [%s] on idpay DB", transactionCreationRequest.getInitiativeId(), idpayMerchantId);
 
-            return new NotFoundException(Response
-                    .status(Response.Status.NOT_FOUND)
-                    .entity(new ErrorResponse(ErrorCode.INITIATIVE_NOT_FOUND_IDPAY_DB_FOR_MERCHANT, ErrorCode.INITIATIVE_NOT_FOUND_IDPAY_DB_FOR_MERCHANT_MSG))
-                    .build());
-        })
+                    return new NotFoundException(Response
+                            .status(Response.Status.NOT_FOUND)
+                            .entity(new ErrorResponse(ErrorCode.INITIATIVE_NOT_FOUND_IDPAY_DB_FOR_MERCHANT, ErrorCode.INITIATIVE_NOT_FOUND_IDPAY_DB_FOR_MERCHANT_MSG))
+                            .build());
+                })
                 .chain(initiative -> {
                     IdpayTransactionEntity entity = createIdpayTransactionEntity(UUID.randomUUID().toString(), idpayMerchantId, xAcquirerId, transactionCreationRequest);
                     Log.debugf("IdpayService -> createTransaction: storing idpay transaction [%s] on idpay DB", entity);
 
                     return idpayTransactionRepository.persist(entity)
-                            .onFailure().transform(err-> {
+                            .onFailure().transform(err -> {
                                 Log.errorf(err, "IdpayService -> createTransaction: Error while storing transaction %s on db", entity.transactionId);
 
                                 return new InternalServerErrorException(Response
@@ -216,7 +216,7 @@ public class IdpayService {
                     return getInitiativeEntity(transaction.idpayTransaction.getInitiativeId())
                             .chain(initiative -> {
                                 if ((transaction.idpayTransaction.getCounter() < initiative.initiative.getRetriesIntStatusChanges()) //se count prima del intermedio o tra Int e Fin - solo increment count
-                                        || (transaction.idpayTransaction.getCounter() >  initiative.initiative.getRetriesIntStatusChanges()
+                                        || (transaction.idpayTransaction.getCounter() > initiative.initiative.getRetriesIntStatusChanges()
                                         && transaction.idpayTransaction.getCounter() < initiative.initiative.getRetriesFinStatusChanges())) {
                                     transaction.idpayTransaction.setCounter(transaction.idpayTransaction.getCounter() + 1);
                                     return updateIdpayTransactionEntity(transaction)
@@ -425,17 +425,17 @@ public class IdpayService {
 
         return Uni.createFrom().item(PreAuthPaymentResponseDTO
                 .builder()
-                        .id("id")
-                        .trxCode("trxCode")
-                        .amountCents(1234L)
-                        .reward(123L)
-                        .initiativeId("iniziativeId1")
-                        .status(TransactionStatus.IDENTIFIED)
-                        .secondFactor(StringUtils.leftPad(RandomStringUtils.random(12, false, true), 16, "0"))
+                .id("id")
+                .trxCode("trxCode")
+                .amountCents(1234L)
+                .reward(123L)
+                .initiativeId("iniziativeId1")
+                .status(TransactionStatus.IDENTIFIED)
+                .secondFactor(StringUtils.leftPad(RandomStringUtils.random(12, false, true), 16, "0"))
                 .build());
     }
 
-    public Uni<String> encryptSessionKeyForIdpay(String modulus, String exponent, String sessionKey)  {
+    public Uni<String> encryptSessionKeyForIdpay(String modulus, String exponent, String sessionKey) {
 
         Log.debugf("IdpayService -> encryptSessionKeyForIdpay - Input parameters: [%s], [%s], [%s]", modulus, exponent, sessionKey);
         try {
@@ -453,18 +453,17 @@ public class IdpayService {
             KeyFactory keyFactory = KeyFactory.getInstance("RSA");
             PublicKey rsaPublicKey = keyFactory.generatePublic(rsaPublicKeySpec);
 
-            Cipher cipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA-256AndMGF1Padding");
+            Cipher cipher = Cipher.getInstance("RSA/ECB/OAEPPadding");
+            OAEPParameterSpec oaepParams = new OAEPParameterSpec("SHA-256", "MGF1",
+                    new MGF1ParameterSpec("SHA-256"), PSource.PSpecified.DEFAULT);
+            cipher.init(Cipher.ENCRYPT_MODE, rsaPublicKey, oaepParams);
+
             byte[] sessionKeyBytes = sessionKey.getBytes(StandardCharsets.UTF_8);
-            cipher.init(Cipher.ENCRYPT_MODE, rsaPublicKey);
-
-            SecretKey key = this.generateSessionKey();
-
-            //byte[] encryptedSessionKeyBytes = cipher.doFinal(sessionKeyBytes);
-
-            byte[] encryptedSessionKeyBytes = cipher.doFinal(key.getEncoded());
+            byte[] encryptedSessionKeyBytes = cipher.doFinal(sessionKeyBytes);
 
             // encryptedSessionKeyBytes contains encrypted session key
             return Uni.createFrom().item(Base64.getUrlEncoder().encodeToString(encryptedSessionKeyBytes));
+
         } catch (NoSuchAlgorithmException | InvalidKeySpecException |
                  NoSuchPaddingException | InvalidKeyException |
                  IllegalBlockSizeException |
@@ -478,29 +477,8 @@ public class IdpayService {
                     .status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity(new ErrorResponse(ErrorCode.ERROR_ENCRYPTING_SESSION_KEY, ErrorCode.ERROR_ENCRYPTING_SESSION_KEY_MSG))
                     .build());
-        }
-    }
-
-
-    public SecretKey generateSessionKey() {
-        Log.debugf("IdpayService -> generateSessionKey - START");
-
-        try {
-            KeyGenerator generator = KeyGenerator.getInstance("AES");
-            generator.init(256);
-
-            return generator.generateKey();
-
-        } catch (NoSuchAlgorithmException error) {
-
-            // If encrypt retrieve some error, return INTERNAL_SERVER_ERROR
-            Log.errorf("Error during generating session key");
-            error.printStackTrace();
-
-            throw new InternalServerErrorException(Response
-                    .status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(new ErrorResponse(ErrorCode.ERROR_ENCRYPTING_SESSION_KEY, ErrorCode.ERROR_ENCRYPTING_SESSION_KEY_MSG))
-                    .build());
+        } catch (InvalidAlgorithmParameterException e) {
+            throw new RuntimeException(e);
         }
     }
 }
