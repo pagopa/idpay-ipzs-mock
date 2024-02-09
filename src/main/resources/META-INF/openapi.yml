@@ -241,10 +241,10 @@ paths:
           description: OK
           content:
             application/json: {}
-        "401":
-          description: Not Authorized
         "403":
           description: Not Allowed
+        "401":
+          description: Not Authorized
       security:
       - SecurityScheme: []
 components:
@@ -331,11 +331,11 @@ components:
       example: 2022-03-10
     PinBlockDTO:
       required:
-      - encryptedPinBlock
+      - pinBlock
       - encryptedKey
       type: object
       properties:
-        encryptedPinBlock:
+        pinBlock:
           type: string
         encryptedKey:
           type: string
