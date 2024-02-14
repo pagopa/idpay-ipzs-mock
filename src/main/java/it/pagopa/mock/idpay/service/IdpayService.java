@@ -176,7 +176,7 @@ public class IdpayService {
         idpayTransaction.setAmountCurrency("EUR");
         idpayTransaction.setAcquirerId(xAcquirerId);
         idpayTransaction.setStatus(TransactionStatus.CREATED);
-        idpayTransaction.setTrxTxtUrl(RandomStringUtils.random(32, true, true));
+        idpayTransaction.setQrcodeTxtUrl(RandomStringUtils.random(32, true, true));
 
         idpayTransaction.setOperationType(OperationType.CHARGE);
         idpayTransaction.setCounter(1);
@@ -201,7 +201,7 @@ public class IdpayService {
         response.setAmountCurrency(entity.idpayTransaction.getAmountCurrency());
         response.setAcquirerId(entity.idpayTransaction.getAcquirerId());
         response.setStatus(entity.idpayTransaction.getStatus());
-        response.setTrxTxtUrl(entity.idpayTransaction.getTrxTxtUrl());
+        response.setQrcodeTxtUrl(entity.idpayTransaction.getQrcodeTxtUrl());
 
         return response;
     }
@@ -335,7 +335,7 @@ public class IdpayService {
         } else {
             idpayTransaction.setStatus(initiative.initiative.getTransactionIntermediateStatus());
         }
-        idpayTransaction.setTrxTxtUrl(entity.idpayTransaction.getTrxTxtUrl());
+        idpayTransaction.setQrcodeTxtUrl(entity.idpayTransaction.getQrcodeTxtUrl());
         idpayTransaction.setOperationType(entity.idpayTransaction.getOperationType());
         idpayTransaction.setCounter(entity.idpayTransaction.getCounter());
 
