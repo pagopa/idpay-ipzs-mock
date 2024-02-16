@@ -481,6 +481,7 @@ public class IdpayService {
     }
 
     private byte[] decodeBase64UrlOrBase64(String base64) {
+        Log.debugf("IdpayService -> decodeBase64UrlOrBase64 - Input parameters: [%s]", base64);
         return (base64.contains("-") || base64.contains("_") ? Base64.getUrlDecoder() : Base64.getDecoder()).decode(base64);
     }
 }
