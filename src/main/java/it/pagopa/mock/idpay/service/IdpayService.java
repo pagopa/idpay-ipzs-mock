@@ -13,14 +13,16 @@ import jakarta.ws.rs.core.Response;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import javax.crypto.*;
-import javax.crypto.spec.OAEPParameterSpec;
-import javax.crypto.spec.PSource;
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
-import java.security.*;
+import java.security.InvalidKeyException;
+import java.security.KeyFactory;
+import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
-import java.security.spec.MGF1ParameterSpec;
 import java.security.spec.RSAPublicKeySpec;
 import java.util.Base64;
 import java.util.Date;
@@ -440,8 +442,8 @@ public class IdpayService {
         Log.debugf("IdpayService -> encryptSessionKeyForIdpay - Input parameters: [%s], [%s], [%s]", modulus, exponent, sessionKey);
         try {
             // Decode Base64 values in byte
-            byte[] modulusBytes = Base64.getUrlDecoder().decode(modulus);
-            byte[] exponentBytes = Base64.getUrlDecoder().decode(exponent);
+            byte[] modulusBytes = decodeBase64UrlOrBase64(modulus);
+            byte[] exponentBytes = decodeBase64UrlOrBase64(exponent);
 
             // Create specific RSA public key
             RSAPublicKeySpec rsaPublicKeySpec = new RSAPublicKeySpec(
@@ -453,16 +455,14 @@ public class IdpayService {
             KeyFactory keyFactory = KeyFactory.getInstance("RSA");
             PublicKey rsaPublicKey = keyFactory.generatePublic(rsaPublicKeySpec);
 
-            Cipher cipher = Cipher.getInstance("RSA/ECB/OAEPPadding");
-            OAEPParameterSpec oaepParams = new OAEPParameterSpec("SHA-256", "MGF1",
-                    new MGF1ParameterSpec("SHA-256"), PSource.PSpecified.DEFAULT);
-            cipher.init(Cipher.ENCRYPT_MODE, rsaPublicKey, oaepParams);
+            Cipher cipher = Cipher.getInstance("RSA/ECB/OAEPWithSHA-256AndMGF1Padding");
+            cipher.init(Cipher.ENCRYPT_MODE, rsaPublicKey);
 
-            byte[] sessionKeyBytes = sessionKey.getBytes(StandardCharsets.UTF_8);
+            byte[] sessionKeyBytes = decodeBase64UrlOrBase64(sessionKey);
             byte[] encryptedSessionKeyBytes = cipher.doFinal(sessionKeyBytes);
 
             // encryptedSessionKeyBytes contains encrypted session key
-            return Uni.createFrom().item(Base64.getUrlEncoder().encodeToString(encryptedSessionKeyBytes));
+            return Uni.createFrom().item(Base64.getEncoder().encodeToString(encryptedSessionKeyBytes));
 
         } catch (NoSuchAlgorithmException | InvalidKeySpecException |
                  NoSuchPaddingException | InvalidKeyException |
@@ -477,8 +477,10 @@ public class IdpayService {
                     .status(Response.Status.INTERNAL_SERVER_ERROR)
                     .entity(new ErrorResponse(ErrorCode.ERROR_ENCRYPTING_SESSION_KEY, ErrorCode.ERROR_ENCRYPTING_SESSION_KEY_MSG))
                     .build());
-        } catch (InvalidAlgorithmParameterException e) {
-            throw new RuntimeException(e);
         }
+    }
+
+    private byte[] decodeBase64UrlOrBase64(String base64) {
+        return (base64.contains("-") || base64.contains("_") ? Base64.getUrlDecoder() : Base64.getDecoder()).decode(base64);
     }
 }
