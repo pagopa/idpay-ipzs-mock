@@ -10,7 +10,6 @@ import it.pagopa.mock.idpay.bean.ipzs.Outcome;
 import it.pagopa.mock.idpay.client.IdpayRestClient;
 import it.pagopa.mock.idpay.dao.IdpayTransactionRepository;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
@@ -20,14 +19,17 @@ public class IpzsService {
     @RestClient
     IdpayRestClient idpayRestClient;
 
-    @Inject
-    IdpayTransactionRepository idpayTransactionRepository;
+    private final IdpayTransactionRepository idpayTransactionRepository;
 
-    @Inject
-    IdpayService idpayService;
+    private final IdpayService idpayService;
 
     @ConfigProperty(name = "ipzs-call-idpay", defaultValue = "no")
     String ipzsCallIdpay;
+
+    public IpzsService(IdpayTransactionRepository idpayTransactionRepository, IdpayService idpayService) {
+        this.idpayTransactionRepository = idpayTransactionRepository;
+        this.idpayService = idpayService;
+    }
 
     public Uni<IpzsVerifyCieResponse> identitycards(String transactionId, IpzsVerifyCieRequest ipzsVerifyCieRequest) {
         Log.debugf("IpzsService -> identitycards - Input parameters: [%s], [%s]", transactionId, ipzsVerifyCieRequest);
@@ -65,8 +67,11 @@ public class IpzsService {
     private String getCfByNis(String nis) {
         String cf = "RSSBNC64T70G677R";
 
-        if ("111122223333".equals(nis))
+        if ("111122223333".equals(nis)) {
             cf = "RSSBNC64T70G677R";
+        } else if ("939386791082".equals(nis)) {
+            cf = "PSSNCL93R02G148Y";
+        }
 
         return cf;
     }
