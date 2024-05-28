@@ -405,17 +405,17 @@ public class IdpayService {
                                 return transaction;
                             })
                             .chain(entity -> {
-                                AuthTransactionResponse authTransactionResponse = new AuthTransactionResponse();
-                                AuthTransactionResponseOk authTransactionResponseOk = AuthTransactionResponseOk
+                                AuthTransactionResponse authTransactionResponse = AuthTransactionResponse
                                         .builder()
                                         .id(entity.idpayTransaction.getId())
                                         .trxCode(entity.idpayTransaction.getTrxCode())
-                                        .amountCents(entity.idpayTransaction.getAmountCents())
+                                        .trxDate(entity.idpayTransaction.getTrxDate())
                                         .initiativeId(entity.idpayTransaction.getInitiativeId())
                                         .status(entity.idpayTransaction.getStatus())
+                                        .rewardCents(entity.idpayTransaction.getRewardCents())
+                                        .amountCents(entity.idpayTransaction.getAmountCents())
+                                        .residualBudgetCents(entity.idpayTransaction.getResidualAmountCents())
                                         .build();
-
-                                authTransactionResponse.setAuthTransactionResponseOk(authTransactionResponseOk);
 
                                 return Uni.createFrom().item(authTransactionResponse);
                             });
@@ -430,7 +430,7 @@ public class IdpayService {
                 .id("id")
                 .trxCode("trxCode")
                 .amountCents(1234L)
-                .reward(123L)
+                .rewardCents(123L)
                 .initiativeId("iniziativeId1")
                 .status(TransactionStatus.IDENTIFIED)
                 .secondFactor(StringUtils.leftPad(RandomStringUtils.random(12, false, true), 16, "0"))

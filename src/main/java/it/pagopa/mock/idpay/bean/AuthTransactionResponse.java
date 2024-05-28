@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Date;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -13,6 +15,14 @@ import lombok.NoArgsConstructor;
 @RegisterForReflection
 public class AuthTransactionResponse {
 
-    private AuthTransactionResponseOk authTransactionResponseOk;
-    private AuthTransactionResponseWrong authTransactionResponseWrong;
+    private String id;
+    private String trxCode;
+    private Date trxDate;
+    private String initiativeId;
+    private String initiativeName;
+    private String businessName;
+    private TransactionStatus status;
+    private Long rewardCents;
+    private Long amountCents;
+    private Long residualBudgetCents;
 }
